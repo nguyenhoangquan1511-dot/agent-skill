@@ -198,6 +198,67 @@ is the whole process.
 - Where existing code has problems that affect the work (e.g., a file that's grown too large, unclear boundaries, tangled responsibilities), include targeted improvements as part of the design - the way a good developer improves code they're working in.
 - Don't propose unrelated refactoring. Stay focused on what serves the current goal.
 
+## Spec Content Rules
+
+A spec is a **Business Analyst document**, not a code sketch. It answers *what*
+and *why*, never *how to write it*.
+
+### 1. Depth: explain the logic, step by step
+
+The value of a spec is in the reasoning an implementer cannot recover from the
+codebase. Go as deep as you can here — this is the part worth spending on.
+
+| Content | In the spec? |
+|---|---|
+| Goal, scope, explicit non-goals (YAGNI) | Required |
+| Business rules and *why* each one exists | Required |
+| User flows and the processing steps in execution order, numbered | Required |
+| Edge cases, and the expected outcome for each one | Required |
+| Error handling: which errors, which fields, what the user sees | Required |
+| Architecture: the units, each unit's responsibility, boundaries, how they talk | Required |
+| Data contracts / shapes (fields, types, meaning) — as a table or a short type | Required |
+| Decisions made, the reasoning, and the alternatives rejected | Required |
+| Function bodies, full components, implementation files | **Forbidden** |
+
+Write the steps so a reader who has never seen the codebase can follow the
+business logic end to end. "Validate the input" is not a step. "Reject when
+`endDate` is earlier than `startDate`; return field-level error on `endDate`"
+is a step.
+
+### 2. Code: the one exception
+
+A snippet of at most 10 lines, only when **both** hold:
+
+1. It is special logic **just settled in this discussion** and confirmed by the
+   user — a formula, rounding rule, regex, precedence order, value mapping.
+2. Prose would be ambiguous, or longer than the snippet.
+
+Add one line stating why it was settled that way; that reasoning is what the
+plan and the implementer actually need.
+
+Why the limit: code written at spec time is written blind. There is no codebase
+open and no test run, so it gets rewritten during implementation anyway — you
+pay the tokens twice and the first version is usually wrong. Only at
+implementation time, with the real files and a passing test, is code trustworthy.
+
+If you want to write code to *explore* a solution, the decision is not settled.
+Ask the user, settle it in prose, then write the spec.
+
+### 3. Testing: name the cases, do not write them
+
+State the testing strategy and list the cases as plain text a human can read:
+
+```
+- rejects an end date earlier than the start date -> field error on endDate
+- accepts an end date equal to the start date -> passes
+- summary rows survive department filtering -> always kept
+```
+
+No test functions, no assertions, no framework syntax. A case is a sentence:
+condition, then expected result.
+
+---
+
 ## After the Design (architectural path)
 
 **Documentation:**
@@ -214,6 +275,7 @@ After writing the spec document, look at it with fresh eyes:
 2. **Internal consistency:** Do any sections contradict each other? Does the architecture match the feature descriptions?
 3. **Scope check:** Is this focused enough for a single implementation plan, or does it need decomposition?
 4. **Ambiguity check:** Could any requirement be interpreted two different ways? If so, pick one and make it explicit.
+5. **Code-bloat scan:** Every remaining code block must be either a data contract or special logic that was settled with the user, at most 10 lines. Otherwise delete it and replace it with a behavior description. Removing code must not make the spec vaguer — if a requirement becomes readable two ways once the code is gone, tighten the prose instead of putting the code back.
 
 Fix any issues inline. No need to re-review — just fix and move on.
 

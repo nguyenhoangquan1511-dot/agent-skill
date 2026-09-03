@@ -7,7 +7,7 @@ description: Use when you have a spec or requirements for a multi-step task, bef
 
 ## Overview
 
-Write comprehensive implementation plans assuming the engineer has zero context for our codebase and questionable taste. Document everything they need to know: which files to touch for each task, code, testing, docs they might need to check, how to test it. Give them the whole plan as bite-sized tasks. DRY. YAGNI. TDD. Frequent commits.
+Write comprehensive implementation plans assuming the engineer has zero context for our codebase and questionable taste. Document everything they need to know: which files to touch for each task, the behavior to build in execution order, testing, docs they might need to check, how to test it. The plan carries the *skeleton* — files, signatures, behavior, test cases — not implementation code. See Plan Content Rules. Give them the whole plan as bite-sized tasks. DRY. YAGNI. TDD. Frequent commits.
 
 Assume they are a skilled developer, but know almost nothing about our toolset or problem domain. Assume they don't know good test design very well.
 
@@ -59,6 +59,7 @@ independently testable deliverable.
 # [Feature Name] Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> This plan is intentionally skeleton-level: it specifies files, signatures, behavior and test cases, NOT implementation code. Read the real files before writing each task's code.
 
 **Goal:** [One sentence describing what this builds]
 
@@ -79,6 +80,40 @@ include this section.]
 ---
 ```
 
+## Plan Content Rules
+
+The plan describes the skeleton. It does **not** contain implementation code.
+
+Why: code written into a plan gets rewritten during implementation — double the
+tokens. Worse, planning-time code is written blind, with no codebase open and no
+test run, so it rarely matches reality and the implementer edits it anyway. Code
+is only trustworthy at implementation time, against real files and a passing test.
+
+| Content | Allowed? |
+|---|---|
+| Exact file paths (Create / Modify `path:line`) | Required |
+| Function/class/component names with signatures (params, return types) | Required |
+| Prose describing the required behavior, numbered, in execution order | Required |
+| Edge cases and the expected outcome for each | Required |
+| Test cases as a text checklist: `case name -> expected` | Required |
+| Commands to run tests / build / commit | Required |
+| New type / interface / schema / enum / config definitions | Yes — contracts, not implementation |
+| Snippet of at most 10 lines for special logic settled during brainstorming | Yes — see below |
+| Full function bodies, full component files, full test files | **Forbidden** |
+
+**The only exception for writing code.** Both must hold:
+
+1. It is special logic **explicitly discussed and confirmed** during brainstorming
+   or in the spec — a formula, rounding rule, regex, sort order, value mapping.
+   Not "here is how I would write it."
+2. Prose would be ambiguous, or longer than the snippet.
+
+At most 10 lines, containing only the special part — no surrounding boilerplate.
+If both are not true, write prose.
+
+**Tests are a checklist, not code.** List each case as a readable sentence with
+its expected result. No test functions, no assertions, no framework syntax.
+
 ## Task Structure
 
 ````markdown
@@ -95,29 +130,32 @@ include this section.]
   and return types. A task's implementer sees only their own task; this
   block is how they learn the names and types neighboring tasks use.]
 
-- [ ] **Step 1: Write the failing test**
+- [ ] **Step 1: Write the failing tests**
 
-```python
-def test_specific_behavior():
-    result = function(input)
-    assert result == expected
-```
+Add to `tests/path/test.py`. Cases that must pass:
 
-- [ ] **Step 2: Run test to verify it fails**
+- rejects an end date earlier than the start date -> field error on `endDate`
+- accepts an end date equal to the start date -> passes
+- summary rows survive department filtering -> always kept
 
-Run: `pytest tests/path/test.py::test_name -v`
+- [ ] **Step 2: Run tests to verify they fail**
+
+Run: `pytest tests/path/test.py -v`
 Expected: FAIL with "function not defined"
 
 - [ ] **Step 3: Write minimal implementation**
 
-```python
-def function(input):
-    return expected
-```
+Add `filter_by_department(rows: list[KpiRow], dept_id: str) -> list[KpiRow]`
+to `src/path/file.py`.
 
-- [ ] **Step 4: Run test to verify it passes**
+Behavior, in order:
+1. Keep a row when `row.department_id == dept_id`.
+2. Always keep rows where `row.type == "summary"`, whatever the department.
+3. Must not mutate the input list — return a new one.
 
-Run: `pytest tests/path/test.py::test_name -v`
+- [ ] **Step 4: Run tests to verify they pass**
+
+Run: `pytest tests/path/test.py -v`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
@@ -133,10 +171,23 @@ git commit -m "feat: add specific feature"
 Every step must contain the actual content an engineer needs. These are **plan failures** — never write them:
 - "TBD", "TODO", "implement later", "fill in details"
 - "Add appropriate error handling" / "add validation" / "handle edge cases"
-- "Write tests for the above" (without actual test code)
-- "Similar to Task N" (repeat the code — the engineer may be reading tasks out of order)
-- Steps that describe what to do without showing how (code blocks required for code steps)
+- "Write tests for the above" — list every test case by name with its expected result
+- "Similar to Task N" — restate it; the engineer may be reading tasks out of order
 - References to types, functions, or methods not defined in any task
+
+Skeleton is not the same as vague. Removing code means the prose must get
+*tighter*, not looser. Calibration:
+
+```
+Too vague:    "Update the service to filter by department"
+Too detailed: [30 lines of full TypeScript service code]
+Right level:
+   Modify: `src/services/kpi.ts`
+   - Add `filterByDepartment(rows: KpiRow[], deptId: string): KpiRow[]`
+   - Keep a row when `row.departmentId === deptId`; always keep rows where
+     `row.type === 'summary'` regardless of department
+   - Must not mutate the input array
+```
 
 ## Self-Review
 
@@ -147,6 +198,12 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 **2. Placeholder scan:** Search your plan for red flags — any of the patterns from the "No Placeholders" section above. Fix them.
 
 **3. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
+
+**4. Code-bloat scan:** Sweep the whole plan. For each remaining code block — is it a
+type / interface / schema / config, or special logic confirmed during brainstorming at
+most 10 lines? Keep it. Otherwise delete it and replace it with a behavior description
+plus the signature. Deleting code must not make the plan vaguer; if removing a block
+leaves a requirement open to two readings, tighten the prose instead of restoring it.
 
 If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
 
