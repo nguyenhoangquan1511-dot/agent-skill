@@ -51,6 +51,10 @@ Nếu user chọn cả Pi và Oh-My-Pi trong cùng một lần chạy, cả hai 
 5. Với mỗi target path: tạo thư mục nếu chưa có, sau đó copy đệ quy từng thư mục skill (`qskill-*`) từ package vào `<target>/<skill-name>/`, ghi đè nếu đã tồn tại.
 6. In log kết quả: liệt kê skill nào đã cài vào path nào, tổng kết cuối cùng.
 
+## Phân phối
+
+Package sẽ được `npm publish` lên npm registry với tên `q-skill`, để lệnh `npx q-skill` chạy được từ bất kỳ đâu mà không cần biết vị trí repo. Trong quá trình phát triển, test bằng `npx .` hoặc `npm link` ngay trong repo trước khi publish chính thức.
+
 ## Cấu trúc package
 
 ```
