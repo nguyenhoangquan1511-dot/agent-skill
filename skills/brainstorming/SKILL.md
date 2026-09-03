@@ -5,6 +5,9 @@ description: "You MUST use this before any creative work - creating features, bu
 
 # Brainstorming Ideas Into Designs
 
+**Ngôn ngữ:** Viết tài liệu spec bằng tiếng Việt — tiêu đề, diễn giải, business rule, edge case, tên test case.
+**Ngôn ngữ:** Trao đổi với user bằng tiếng Việt. Giữ nguyên code, identifier, đường dẫn file, câu lệnh và tên type ở dạng gốc.
+
 Help turn ideas into fully formed designs and specs through natural collaborative dialogue.
 
 Start by classifying how much process the request needs, then work
