@@ -16,11 +16,23 @@ Load plan, review critically, execute all tasks, report when complete.
 ## The Process
 
 ### Step 1: Load and Review Plan
-1. Ensure an isolated workspace: use superpowers:using-git-worktrees to create one or verify the existing one
+1. Work inline on the current branch by default - do NOT create a worktree or a new branch on your own. Only if the current branch is unsuitable (e.g. you are on `main`/`master`) do you pause, explain why, and ask the user for permission; wait for explicit approval before creating a worktree or branch (see "Workspace Rule" below).
 2. Read plan file
 3. Review critically - identify any questions or concerns about the plan
 4. If concerns: Raise them with your human partner before starting
 5. If no concerns: Create todos for the plan items and proceed
+
+### Workspace Rule (inline-first)
+
+**Default: implement inline, right on the branch you are currently standing on.**
+
+- Never create a git worktree, never create a new branch, never switch branches on your own initiative.
+- If you are on `main`/`master` (or any branch where direct work is inappropriate), STOP and ask the user:
+  - state which branch you are on and why working there is risky
+  - propose the option (worktree or new branch) with a concrete name
+  - wait for explicit user approval
+- Only after the user agrees do you use superpowers:using-git-worktrees. If the user declines, continue inline on the current branch.
+- If a worktree is approved, place it under `.claude/worktrees/` with a descriptive name.
 
 ### Step 2: Execute Tasks
 
@@ -61,4 +73,5 @@ After all tasks complete and verified:
 - Don't skip verifications
 - Reference skills when plan says to
 - Stop when blocked, don't guess
+- Work inline on the current branch by default; never create a worktree or branch on your own
 - Never start implementation on main/master branch without explicit user consent
