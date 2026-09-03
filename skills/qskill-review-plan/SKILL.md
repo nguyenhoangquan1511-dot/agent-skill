@@ -306,6 +306,56 @@ Updating only the review report is invalid.
 
 ---
 
+# Plan Content Rules Apply To Every Edit
+
+A fix must never lower the quality of the Plan.
+
+Every edit written into the Plan during feedback MUST obey the Plan Content Rules
+of the `qskill-writing-plans` skill. Read that section before editing if it is not
+already in context.
+
+The rules that get broken most often
+
+- Full function bodies, full component files and full test files are forbidden in
+  the Plan. Resolving an issue by pasting implementation code is not a fix.
+- Test cases stay a text checklist `case name -> expected`. Never test code.
+- Code is allowed only for contracts (type / interface / schema / enum / config),
+  or for special logic already confirmed in the spec, at most 10 lines.
+- Deleting a code block is only half of the fix. The same logic must be rewritten
+  in Business Analyst language — numbered steps in execution order, the condition
+  of each branch, the outcome of each branch, and the failure behaviour.
+- Removing code must never make the Plan vaguer. "Handle it appropriately" is as
+  invalid as a code dump.
+
+Why: code written at planning time is written blind and gets rewritten during
+implementation. A review that pushes code into the Plan makes the next execution
+more expensive, not less.
+
+When an issue seems to require implementation code to resolve
+
+the issue is not resolvable in the Plan.
+
+Set it to DISCUSS instead of dumping code.
+
+---
+
+# Recommendation Content Rule
+
+A Recommendation is an instruction for editing the Plan, so it lives under the
+same rules as the Plan itself.
+
+A Recommendation must describe
+
+- which section of the Plan changes
+- what behaviour, signature, edge case or test case must appear there
+
+A Recommendation must NOT contain
+
+- a function body the author is expected to copy into the Plan
+- a ready-made test file
+
+---
+
 # Synchronization Invariant
 
 The Plan and its review report must always represent the same state.
@@ -350,6 +400,7 @@ Use when
 - multiple valid solutions exist
 - insufficient evidence exists
 - human approval is required
+- the only way to resolve it would be to write implementation code into the Plan
 
 ---
 
@@ -363,6 +414,11 @@ For every RESOLVED issue
 - Updated By exists
 - Updated At exists
 - Response exists
+
+- the Plan change obeys the Plan Content Rules — no full function body, no full
+  component file, no test code
+- any code block removed from the Plan has been replaced with Business Analyst
+  language, not with a vague sentence
 
 For every DISCUSS issue
 
@@ -415,6 +471,9 @@ Invalid examples
 - Ignoring an OPEN issue.
 - Recreating the review report.
 - Removing resolved issues.
+- Resolving an issue by writing the implementation into the Plan.
+- Replacing a removed code block with a vague sentence instead of a numbered behaviour description.
+- Turning a test checklist into test code while "clarifying" it.
 
 ---
 
@@ -435,6 +494,10 @@ Never
 - modify immutable fields
 - mark RESOLVED without updating the Plan
 - update the Plan without updating the review report
+- write a full function body, a full component file or a full test file into the Plan
+- resolve an issue by pasting implementation code instead of describing behaviour
+- delete a code block from the Plan without replacing it with Business Analyst language
+- put implementation code inside a Recommendation
 
 ---
 
@@ -450,12 +513,15 @@ yourself. This is an inline checklist — not a subagent dispatch.
 | Clarity | A Problem or Recommendation ambiguous enough that the reader would fix the wrong thing |
 | Traceability | Every Location still points at something that exists in the current artifact |
 | Scope | Issues that belong to a different artifact, or invented requirements with no evidence |
+| Code bloat | Any code block written into the Plan or a Recommendation during this execution. Keep it only if it is a type / interface / schema / config, or confirmed special logic of at most 10 lines. Otherwise replace it with signature plus behaviour description |
 
 **Calibration**
 
 Only flag what would cause a real problem for the next execution. A wrong Status,
 a missing Response, a dangling Location, or an issue so vague it cannot be acted
 on — those are problems. Wording preferences and formatting are not.
+
+Code bloat is always a real problem, never a formatting preference. Fix it.
 
 Fix any issue inline, then move on. Do not re-run the full review.
 
