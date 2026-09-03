@@ -1,18 +1,23 @@
-# Skill: Review Plan
+---
+name: qskill-review-code
+description: Review and continuously improve source code implementation against an approved Plan through iterative review cycles. Use during or after implementation to detect issues.
+---
+
+# Skill: Review Code
 
 **Ngôn ngữ:** Viết review report bằng tiếng Việt — Problem, Recommendation, Response, và mọi phần diễn giải.
 **Ngôn ngữ:** Trao đổi với user bằng tiếng Việt. Giữ nguyên code, identifier, đường dẫn file, câu lệnh, tên type, Issue ID và các giá trị Status (OPEN / RESOLVED / DISCUSS) ở dạng gốc.
 
 ## Objective
 
-Review and continuously improve a Plan or Specification through iterative review cycles.
+Review and continuously improve source code implementation through iterative review cycles.
 
 This skill has two execution modes:
 
 - review
 - feedback
 
-The Plan Review Report is a living document.
+The Code Review Report is a living document.
 
 Never recreate, overwrite, remove, or renumber existing issues.
 Always update the existing review report.
@@ -25,13 +30,14 @@ Always update the existing review report.
 
 Responsibilities
 
-- Analyze the current Plan.
+- Analyze the implementation.
+- Compare implementation against the approved Plan.
 - Detect new issues.
 - Re-evaluate all existing issues.
-- Synchronize issue status with the current Plan.
+- Synchronize issue status with the current code.
 - Update the review report only.
 
-Review MUST NEVER modify the Plan.
+Review MUST NEVER modify source code.
 
 ---
 
@@ -39,11 +45,11 @@ Review MUST NEVER modify the Plan.
 
 Responsibilities
 
-- Resolve review issues by updating the Plan.
-- Synchronize the review report with every Plan change.
-- Keep the Plan and review report consistent at all times.
+- Resolve review issues by updating the source code.
+- Keep the implementation aligned with the approved Plan.
+- Synchronize the review report with every code change.
 
-Feedback MUST update BOTH the Plan and the review report.
+Feedback MUST update BOTH the source code and the review report.
 
 ---
 
@@ -53,13 +59,12 @@ Feedback MUST update BOTH the Plan and the review report.
 
 Allowed
 
-- Plan
-- Specification
-- Existing Plan Review Report
+- Approved Plan
+- Source Code
+- Existing Code Review Report
 
 Must NOT modify
 
-- Plan
 - Source Code
 - Tests
 - Infrastructure
@@ -67,7 +72,7 @@ Must NOT modify
 
 Updates only
 
-- Plan Review Report
+- Code Review Report
 
 ---
 
@@ -75,16 +80,17 @@ Updates only
 
 Allowed
 
-- Plan
-- Specification
-- Plan Review Report
+- Approved Plan
+- Source Code
+- Code Review Report
 
 Must NOT modify
 
-- Source Code
-- Tests
+- Approved Plan
 - Infrastructure
 - Configuration
+
+Tests may be updated only when required to keep implementation correct.
 
 ---
 
@@ -92,14 +98,14 @@ Must NOT modify
 
 Required
 
-- Plan path
+- Approved Plan
+- Source Code path
 
 Optional
 
-- Existing Plan Review Report
+- Existing Code Review Report
 
 If no review report exists, create one.
-
 Otherwise update the existing report.
 
 ---
@@ -120,17 +126,17 @@ Create it if it does not exist.
 **File name**
 
 ```
-YYYY-MM-DD-<topic>-review-plan.md
+YYYY-MM-DD-<topic>-review-code.md
 ```
 
 `YYYY-MM-DD` and `<topic>` are copied verbatim from the artifact under review
-(the Plan file name), so every execution resolves to the same file.
+(the approved Plan file name that drove the implementation), so every execution resolves to the same file.
 
 Example
 
 ```
 docs/superpowers/plans/2026-09-03-user-auth.md
-docs/superpowers/reviews/2026-09-03-user-auth-review-plan.md
+docs/superpowers/reviews/2026-09-03-user-auth-review-code.md
 ```
 
 **Name rules**
@@ -138,21 +144,21 @@ docs/superpowers/reviews/2026-09-03-user-auth-review-plan.md
 - Separator is the hyphen `-` only. Never `.`, never `_`, never a space.
 - The only `.` in the whole name is the one before `md`.
 - All lowercase. `<topic>` keeps the exact spelling used by the artifact.
-- Suffix is exactly `-review-plan` and always sits last, right before `.md`.
+- Suffix is exactly `-review-code` and always sits last, right before `.md`.
 
 Valid
 
 ```
-2026-09-03-user-auth-review-plan.md
+2026-09-03-user-auth-review-code.md
 ```
 
 Invalid
 
 ```
-2026-09-03-user-auth.review-plan.md      (dot as separator)
-2026_09_03-user-auth-review-plan.md      (underscore)
-2026-09-03-review-plan-user-auth.md      (suffix not last)
-2026-09-03-User-Auth-review-plan.md      (uppercase)
+2026-09-03-user-auth.review-code.md      (dot as separator)
+2026_09_03-user-auth-review-code.md      (underscore)
+2026-09-03-review-code-user-auth.md      (suffix not last)
+2026-09-03-User-Auth-review-code.md      (uppercase)
 ```
 
 Never derive the date from today. A report created on day one keeps its original
@@ -166,14 +172,12 @@ one artifact violates the living-document rule.
 
 # Review Report
 
-The review report is the single source of truth for all review issues.
+The review report is the single source of truth for implementation issues.
 
 It is a living document.
 
 Never recreate it.
-
 Never delete existing issues.
-
 Never renumber Issue IDs.
 
 Existing issues remain until explicitly resolved.
@@ -181,8 +185,6 @@ Existing issues remain until explicitly resolved.
 ---
 
 # Issue Structure
-
-Every issue contains
 
 - Issue ID
 - Status
@@ -203,23 +205,13 @@ Mutable fields
 - Updated At
 - Response
 
-All other fields are immutable.
-
 ---
 
 # Issue Lifecycle
 
-OPEN
-│
-├── feedback resolves issue
-▼
-RESOLVED
+OPEN -> RESOLVED
 
-OPEN
-│
-├── human decision required
-▼
-DISCUSS
+OPEN -> DISCUSS
 
 No other transitions are allowed.
 
@@ -229,11 +221,11 @@ No other transitions are allowed.
 
 OPEN
 
-Issue requires action.
+Implementation requires action.
 
 RESOLVED
 
-Issue has been accepted and the Plan has already been updated.
+Implementation has been updated.
 
 DISCUSS
 
@@ -243,32 +235,35 @@ Human decision is required.
 
 # Review Workflow
 
-1. Load the Plan.
-2. Load the existing review report if present.
-3. Review the entire Plan.
-4. Re-evaluate every existing issue.
-5. Reuse existing Issue IDs.
-6. Mark fixed issues as RESOLVED.
-7. Keep unresolved issues OPEN.
-8. Create Issue IDs only for newly discovered problems.
-9. Update the review report.
+1. Load the Approved Plan.
+2. Load the Source Code.
+3. Load the existing review report if present.
+4. Review implementation against the Plan.
+5. Re-evaluate every existing issue.
+6. Reuse existing Issue IDs.
+7. Mark fixed issues as RESOLVED.
+8. Keep unresolved issues OPEN.
+9. Create Issue IDs only for newly discovered problems.
+10. Update the review report.
 
-Review never modifies the Plan.
+Review never modifies source code.
 
 ---
 
 # Feedback Workflow
 
-1. Load the Plan.
-2. Load the review report.
-3. Process every OPEN issue.
-4. Never skip an OPEN issue.
+1. Load the Approved Plan.
+2. Load the Source Code.
+3. Load the review report.
+4. Process every OPEN issue.
+5. Never skip an OPEN issue.
 
 For each OPEN issue
 
 If the issue can be safely resolved
 
-- Update the Plan.
+- Update the source code.
+- Update tests if required.
 - Update Status to RESOLVED.
 - Update Updated By.
 - Update Updated At.
@@ -289,13 +284,14 @@ Processing an issue is atomic.
 
 The following operations must complete together.
 
-- Update Plan
+- Update Source Code
+- Update Tests (if required)
 - Update Status
 - Update Updated By
 - Update Updated At
 - Update Response
 
-Updating only the Plan is invalid.
+Updating only the code is invalid.
 
 Updating only the review report is invalid.
 
@@ -303,17 +299,15 @@ Updating only the review report is invalid.
 
 # Synchronization Invariant
 
-The Plan and its review report must always represent the same state.
+The implementation and its review report must always represent the same state.
 
-Whenever the Plan changes
-
+Whenever the code changes,
 the corresponding review issue must also be updated.
 
-Whenever an issue becomes RESOLVED
+Whenever an issue becomes RESOLVED,
+the required code change must already exist.
 
-the required Plan change must already exist.
-
-The task is incomplete if the Plan and review report are inconsistent.
+The task is incomplete if the implementation and review report are inconsistent.
 
 ---
 
@@ -324,8 +318,6 @@ Every OPEN issue encountered during feedback must end in exactly one state.
 - RESOLVED
 - DISCUSS
 
-Leaving an OPEN issue unchanged after processing is not allowed.
-
 ---
 
 # Decision Matrix
@@ -335,14 +327,14 @@ RESOLVED
 Use when
 
 - the issue is valid
-- the Plan has been updated
+- the implementation has been updated
 
 DISCUSS
 
 Use when
 
-- business intent is unclear
-- multiple valid solutions exist
+- the Plan is ambiguous
+- multiple valid implementations exist
 - insufficient evidence exists
 - human approval is required
 
@@ -354,7 +346,8 @@ Before finishing verify
 
 For every RESOLVED issue
 
-- the Plan contains the required change
+- the implementation contains the required change
+- the implementation still conforms to the Approved Plan
 - Updated By exists
 - Updated At exists
 - Response exists
@@ -363,23 +356,28 @@ For every DISCUSS issue
 
 - Response exists
 
-The review report matches the current Plan.
+The review report matches the current implementation.
 
 Report location
 
 - the report lives in `docs/superpowers/reviews/`
-- the file name matches `YYYY-MM-DD-<topic>-review-plan.md`
+- the file name matches `YYYY-MM-DD-<topic>-review-code.md`
 - no duplicate report exists for the same artifact
 
-If any validation fails
-
-continue updating before completing.
+If validation fails, continue updating.
 
 ---
 
 # Evidence Rule
 
 Every decision must be supported by evidence.
+
+Evidence may include
+
+- Approved Plan
+- Existing architecture
+- Project conventions
+- Source code
 
 Never invent requirements.
 
@@ -404,12 +402,13 @@ use DISCUSS.
 
 Invalid examples
 
-- Updating the Plan but leaving Status as OPEN.
-- Updating the Plan but not updating Response.
+- Updating code but leaving Status as OPEN.
+- Updating code but not updating Response.
 - Creating a new Issue ID for an existing issue.
 - Ignoring an OPEN issue.
 - Recreating the review report.
 - Removing resolved issues.
+- Implementing behavior not defined by the Approved Plan.
 
 ---
 
@@ -417,7 +416,7 @@ Invalid examples
 
 Never
 
-- modify the Plan during review mode
+- modify source code during review mode
 - ignore an OPEN issue
 - recreate the review report
 - write the review report anywhere but `docs/superpowers/reviews/`
@@ -428,8 +427,9 @@ Never
 - renumber Issue IDs
 - delete issues
 - modify immutable fields
-- mark RESOLVED without updating the Plan
-- update the Plan without updating the review report
+- mark RESOLVED without updating the code
+- update the code without updating the review report
+- implement functionality outside the Approved Plan without discussion
 
 ---
 
@@ -463,7 +463,8 @@ This check runs in both modes, and it runs before the Git commit.
 The task completes only when
 
 - every required issue has been processed
-- the Plan and review report are synchronized
+- implementation and review report are synchronized
+- implementation conforms to the Approved Plan
 - all validation rules pass
 
 ---
@@ -474,21 +475,21 @@ The task completes only when
 
 Review completed successfully.
 
-Updated Review Report
+Updated Code Review Report
 
-docs/superpowers/reviews/YYYY-MM-DD-<topic>-review-plan.md
+docs/superpowers/reviews/YYYY-MM-DD-<topic>-review-code.md
 
 ## feedback
 
 Feedback completed successfully.
 
-Updated Plan
+Updated Source Code
 
-<plan path>
+<source code path>
 
-Updated Review Report
+Updated Code Review Report
 
-docs/superpowers/reviews/YYYY-MM-DD-<topic>-review-plan.md
+docs/superpowers/reviews/YYYY-MM-DD-<topic>-review-code.md
 
 ---
 

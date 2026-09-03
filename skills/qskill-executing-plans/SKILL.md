@@ -1,5 +1,5 @@
 ---
-name: executing-plans
+name: qskill-executing-plans
 description: Use when you have a written implementation plan to execute in a separate session with review checkpoints
 ---
 
