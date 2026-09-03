@@ -149,8 +149,8 @@ digraph brainstorming {
 ```
 
 **Terminal states are path-bound.** Architectural: the ONLY skill you
-invoke after brainstorming is writing-plans — never frontend-design,
-mcp-builder, or any other implementation skill. Bounded: after
+invoke after brainstorming is qskill-writing-plans — never any other
+implementation skill. Bounded: after
 approval, implementation proceeds directly through the normal
 development workflow; no plan document. Spike: the terminal state is a
 reported recommendation.
@@ -309,7 +309,6 @@ condition, then expected result.
 
 - Write the validated design (spec) to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
   - (User preferences for spec location override this default)
-- Use elements-of-style:writing-clearly-and-concisely skill if available
 - Commit the design document to git
 
 **Spec Self-Review:**

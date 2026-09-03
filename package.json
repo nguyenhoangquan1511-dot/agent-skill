@@ -1,6 +1,6 @@
 {
   "name": "q-skill",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "Interactive installer that copies agent skills into the skill directory of Codex, Claude, Pi, Oh-My-Pi, or CommandCode.",
   "type": "module",
   "bin": {

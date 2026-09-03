@@ -27,13 +27,30 @@ hoặc dùng `npm link` để link package cục bộ rồi gọi `npx q-skill` 
 
 ## Danh sách skill đi kèm
 
-- `qskill-brainstorming`
-- `qskill-writing-plans`
-- `qskill-executing-plans`
-- `qskill-review-plan`
-- `qskill-review-code`
+Chỉ 6 skill sau hiện trong danh sách skill của agent:
+
+- `qskill-brainstorming` — làm rõ ý tưởng thành spec
+- `qskill-writing-plans` — viết implementation plan từ spec
+- `qskill-executing-plans` — thực thi plan (kèm toàn bộ reference doc của pha thực thi)
+- `qskill-review-plan` — review và cải thiện plan/spec
+- `qskill-review-code` — review code so với plan đã duyệt
+- `qskill-systematic-debugging` — tìm root cause trước khi fix
 
 Tất cả skill đều đổi tên với prefix `qskill-` (cả tên thư mục lẫn field `name:` trong frontmatter) để tránh trùng tên với skill khác đã có sẵn trên máy bạn.
+
+### Reference doc (không hiện trong danh sách skill)
+
+Các workflow phụ nằm trong `qskill-executing-plans/references/`, chỉ được đọc khi skill chính trỏ tới — nhờ vậy danh sách skill không bị rối:
+
+| File | Nội dung |
+|---|---|
+| `subagent-driven-development.md` | Thực thi plan bằng subagent trong cùng session |
+| `using-git-worktrees.md` | Tạo workspace cô lập |
+| `test-driven-development.md` | Vòng lặp TDD (kèm `testing-anti-patterns.md`) |
+| `verification-before-completion.md` | Bắt buộc có bằng chứng trước khi báo xong |
+| `requesting-code-review.md` | Điều phối code reviewer (kèm `code-reviewer.md`) |
+| `finishing-a-development-branch.md` | Merge / PR / dọn dẹp branch |
+| `implementer-prompt.md`, `task-reviewer-prompt.md`, `scripts/` | Prompt template và script hỗ trợ subagent |
 
 ## Bảng path cài đặt
 

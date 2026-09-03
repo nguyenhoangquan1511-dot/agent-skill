@@ -9,9 +9,17 @@ description: Use when you have a written implementation plan to execute in a sep
 
 Load plan, review critically, execute all tasks, report when complete.
 
-**Announce at start:** "I'm using the executing-plans skill to implement this plan."
+**Announce at start:** "I'm using the qskill-executing-plans skill to implement this plan."
 
-**Note:** Tell your human partner that Superpowers works much better with access to subagents (Claude Code, Codex CLI, Codex App, Copilot CLI, and Gemini CLI all qualify; see the per-platform tool refs in `../using-superpowers/references/`). If subagents are available, use superpowers:subagent-driven-development instead of this skill.
+**Note:** This workflow works much better when you have subagents (Claude Code, Codex CLI, Codex App, Copilot CLI, and Gemini CLI all qualify). If subagents are available, follow [references/subagent-driven-development.md](references/subagent-driven-development.md) instead of the process below, and tell your human partner why.
+
+**Reference docs** (read on demand, they are not standalone skills):
+- [references/subagent-driven-development.md](references/subagent-driven-development.md) — same-session execution via subagents
+- [references/using-git-worktrees.md](references/using-git-worktrees.md) — isolated workspace setup
+- [references/test-driven-development.md](references/test-driven-development.md) — TDD loop for each task
+- [references/verification-before-completion.md](references/verification-before-completion.md) — evidence before claiming done
+- [references/requesting-code-review.md](references/requesting-code-review.md) — dispatching a code reviewer
+- [references/finishing-a-development-branch.md](references/finishing-a-development-branch.md) — merge / PR / cleanup
 
 ## The Process
 
@@ -31,7 +39,7 @@ Load plan, review critically, execute all tasks, report when complete.
   - state which branch you are on and why working there is risky
   - propose the option (worktree or new branch) with a concrete name
   - wait for explicit user approval
-- Only after the user agrees do you use superpowers:using-git-worktrees. If the user declines, continue inline on the current branch.
+- Only after the user agrees do you use [using-git-worktrees](references/using-git-worktrees.md). If the user declines, continue inline on the current branch.
 - If a worktree is approved, place it under `.claude/worktrees/` with a descriptive name.
 
 ### Step 2: Execute Tasks
@@ -45,9 +53,8 @@ For each task:
 ### Step 3: Complete Development
 
 After all tasks complete and verified:
-- Announce: "I'm using the finishing-a-development-branch skill to complete this work."
-- **REQUIRED SUB-SKILL:** Use superpowers:finishing-a-development-branch
-- Follow that skill to verify tests, present options, execute choice
+- **REQUIRED REFERENCE:** Follow [references/finishing-a-development-branch.md](references/finishing-a-development-branch.md)
+- Verify tests, present options, execute choice
 
 ## When to Stop and Ask for Help
 
