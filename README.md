@@ -42,5 +42,5 @@ Tất cả skill đều đổi tên với prefix `qskill-` (cả tên thư mục
 | Claude | `.claude/skills` | `~/.claude/skills` |
 | Codex | `.codex/skills` | `~/.codex/skills` |
 | Pi | `.pi/agent/skills` | `~/.pi/agent/skills` |
-| Oh-My-Pi (omp) | *(dùng chung path với Pi)* | *(dùng chung path với Pi)* |
+| Oh-My-Pi (omp) | `.agents/skills` | `~/.agents/skills` |
 | CommandCode | `.commandcode/skills` | `~/.commandcode/skills` |

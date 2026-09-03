@@ -37,10 +37,10 @@ Cả tên thư mục lẫn field `name:` trong frontmatter của từng `SKILL.m
 | Claude | `.claude/skills` | `~/.claude/skills` |
 | Codex | `.codex/skills` | `~/.codex/skills` |
 | Pi | `.pi/agent/skills` | `~/.pi/agent/skills` |
-| Oh-My-Pi (omp) | *(dùng chung path với Pi)* | *(dùng chung path với Pi)* |
+| Oh-My-Pi (omp) | `.agents/skills` | `~/.agents/skills` |
 | CommandCode | `.commandcode/skills` | `~/.commandcode/skills` |
 
-Nếu user chọn cả Pi và Oh-My-Pi trong cùng một lần chạy, cả hai đều ghi vào cùng một thư mục đích (không ghi trùng lặp — dedupe theo path thực tế trước khi copy).
+Pi và Oh-My-Pi mỗi tool có thư mục đích riêng (`.pi/agent/skills` và `.agents/skills`), nên chọn cả hai trong cùng một lần chạy sẽ cài vào hai vị trí khác nhau. Dedupe theo path thực tế trước khi copy chỉ còn áp dụng khi hai lựa chọn trỏ về cùng một đường dẫn (nếu có).
 
 ## Luồng thực thi CLI
 

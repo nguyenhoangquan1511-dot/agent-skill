@@ -24,7 +24,7 @@
   - claude: `.claude/skills` / `~/.claude/skills`
   - codex: `.codex/skills` / `~/.codex/skills`
   - pi: `.pi/agent/skills` / `~/.pi/agent/skills`
-  - omp: dùng chung path với pi
+  - omp: `.agents/skills` / `~/.agents/skills` (riêng, không dùng chung path với pi)
   - commandcode: `.commandcode/skills` / `~/.commandcode/skills`
 - Nếu skill đã tồn tại tại target → ghi đè, không hỏi xác nhận.
 - Nếu 1 target path lỗi (vd không có quyền ghi) → log lỗi, tiếp tục xử lý các target còn lại, không dừng toàn bộ.
@@ -79,8 +79,8 @@ git commit -m "Rename skills with qskill- prefix to avoid collisions"
 
 **Interfaces:**
 - Produces:
-  - `export const TOOLS: Array<{ id: string, label: string, localDir: string, globalDir: string }>` — danh sách 5 tool chọn được trong prompt (`codex`, `claude`, `pi`, `omp`, `commandcode`), mỗi phần tử có `label` hiển thị cho user (vd "Oh-My-Pi (omp)") và `localDir`/`globalDir` là đường dẫn tương đối tính từ project root / home directory tương ứng bảng path mapping trong Global Constraints. Riêng `omp` dùng cùng `localDir`/`globalDir` với `pi`.
-  - `export function resolveTargetPaths(selectedToolIds: string[], scope: 'local' | 'global', cwd: string, homeDir: string): string[]` — với mỗi tool id đã chọn, tra `TOOLS` lấy `localDir` hoặc `globalDir` theo `scope`, join với `cwd` (nếu local) hoặc `homeDir` (nếu global) thành absolute path, dedupe (loại path trùng nhau — trường hợp chọn cả `pi` và `omp`), trả về mảng path duy nhất.
+  - `export const TOOLS: Array<{ id: string, label: string, localDir: string, globalDir: string }>` — danh sách 5 tool chọn được trong prompt (`codex`, `claude`, `pi`, `omp`, `commandcode`), mỗi phần tử có `label` hiển thị cho user (vd "Oh-My-Pi (omp)") và `localDir`/`globalDir` là đường dẫn tương đối tính từ project root / home directory tương ứng bảng path mapping trong Global Constraints. `omp` dùng `localDir`/`globalDir` riêng (`.agents/skills`), không dùng chung với `pi`.
+  - `export function resolveTargetPaths(selectedToolIds: string[], scope: 'local' | 'global', cwd: string, homeDir: string): string[]` — với mỗi tool id đã chọn, tra `TOOLS` lấy `localDir` hoặc `globalDir` theo `scope`, join với `cwd` (nếu local) hoặc `homeDir` (nếu global) thành absolute path, dedupe (loại path trùng nhau nếu có), trả về mảng path duy nhất.
 
 - [ ] **Step 1: Viết `TOOLS` và `resolveTargetPaths`**
 
@@ -92,7 +92,7 @@ Chạy:
 ```bash
 node -e "import('./lib/tool-paths.js').then(m => console.log(m.resolveTargetPaths(['pi','omp'], 'global', process.cwd(), '/home/test')))"
 ```
-Expected: mảng chỉ có 1 phần tử `/home/test/.pi/agent/skills` (không bị trùng lặp dù chọn cả `pi` và `omp`).
+Expected: mảng có 2 phần tử `/home/test/.pi/agent/skills` và `/home/test/.agents/skills` (mỗi tool một path riêng, không trùng lặp).
 
 - [ ] **Step 3: Commit**
 
