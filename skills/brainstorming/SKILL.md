@@ -244,7 +244,48 @@ implementation time, with the real files and a passing test, is code trustworthy
 If you want to write code to *explore* a solution, the decision is not settled.
 Ask the user, settle it in prose, then write the spec.
 
-### 3. Testing: name the cases, do not write them
+### 3. Removing code does NOT mean writing less
+
+This is the single most common way to get this rule wrong. Dropping the code is
+only half the instruction. The other half is mandatory:
+
+> **Replace every deleted code block with the same logic re-expressed in
+> Business Analyst language — the flow, in order, in words a non-programmer on
+> the product side could follow and verify.**
+
+You are changing the *language* the logic is written in, not the *amount* of
+logic. A spec with code removed and nothing put back is a worse spec, and it
+will be rejected.
+
+BA language means: numbered steps in execution order, the condition for each
+branch, what happens on each branch, what the caller/user ends up with, and what
+happens when it goes wrong. Field names and values are welcome — they are domain
+vocabulary, not code. Loops, syntax, and framework calls are not.
+
+```
+Code (forbidden here):
+    for row in rows:
+        if row.status == "draft" and row.owner_id != user.id:
+            continue
+        yield row
+
+Vague (equally forbidden — this is the mistake):
+    "Filter the rows appropriately based on the user"
+
+BA language (required):
+    1. Go through the rows in the order received.
+    2. Skip a row when it is BOTH a draft AND owned by someone other than the
+       current user — drafts are private to their owner until published.
+    3. Keep every other row, including drafts owned by the current user.
+    4. The original order is preserved; the input is never modified.
+    5. If the row list is empty, the result is an empty list, not an error.
+```
+
+The BA version is *longer* than the code. That is expected and correct: it
+carries the reasoning ("drafts are private until published") and the edge case
+(empty list) that the code left implicit.
+
+### 4. Testing: name the cases, do not write them
 
 State the testing strategy and list the cases as plain text a human can read:
 

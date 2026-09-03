@@ -101,7 +101,9 @@ is only trustworthy at implementation time, against real files and a passing tes
 | Snippet of at most 10 lines for special logic settled during brainstorming | Yes — see below |
 | Full function bodies, full component files, full test files | **Forbidden** |
 
-**The only exception for writing code.** Both must hold:
+### The only exception for writing code
+
+Both must hold:
 
 1. It is special logic **explicitly discussed and confirmed** during brainstorming
    or in the spec — a formula, rounding rule, regex, sort order, value mapping.
@@ -111,7 +113,50 @@ is only trustworthy at implementation time, against real files and a passing tes
 At most 10 lines, containing only the special part — no surrounding boilerplate.
 If both are not true, write prose.
 
-**Tests are a checklist, not code.** List each case as a readable sentence with
+### Removing code does NOT mean writing less
+
+This is the single most common way to get this rule wrong. Dropping the code is
+only half the instruction. The other half is mandatory:
+
+> **Replace every deleted code block with the same logic re-expressed in
+> Business Analyst language — the flow, in order, in words a non-programmer on
+> the product side could follow and verify.**
+
+You are changing the *language* the logic is written in, not the *amount* of
+logic. A plan with code removed and nothing put back is a worse plan, and it
+will be rejected.
+
+BA language means: numbered steps in execution order, the condition for each
+branch, what happens on each branch, what the caller/user ends up with, and what
+happens when it goes wrong. Field names and values are welcome — they are domain
+vocabulary, not code. Loops, syntax, and framework calls are not.
+
+```
+Code (forbidden here):
+    for row in rows:
+        if row.status == "draft" and row.owner_id != user.id:
+            continue
+        yield row
+
+Vague (equally forbidden — this is the mistake):
+    "Filter the rows appropriately based on the user"
+
+BA language (required):
+    1. Go through the rows in the order received.
+    2. Skip a row when it is BOTH a draft AND owned by someone other than the
+       current user — drafts are private to their owner until published.
+    3. Keep every other row, including drafts owned by the current user.
+    4. The original order is preserved; the input is never modified.
+    5. If the row list is empty, the result is an empty list, not an error.
+```
+
+The BA version is *longer* than the code. That is expected and correct: it
+carries the reasoning ("drafts are private until published") and the edge case
+(empty list) that the code left implicit.
+
+### Tests are a checklist, not code
+
+List each case as a readable sentence with
 its expected result. No test functions, no assertions, no framework syntax.
 
 ## Task Structure
