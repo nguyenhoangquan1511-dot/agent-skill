@@ -61,7 +61,7 @@ independently testable deliverable.
 ```markdown
 # [Feature Name] Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use [subagent-driven-development](../qskill-executing-plans/references/subagent-driven-development.md) (recommended) or the qskill-executing-plans skill to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use the qskill-executing-plans skill to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 > This plan is intentionally skeleton-level: it specifies files, signatures, behavior and test cases, NOT implementation code. Read the real files before writing each task's code.
 
 **Goal:** [One sentence describing what this builds]
@@ -257,20 +257,9 @@ If you find issues, fix them inline. No need to re-review — just fix and move 
 
 ## Execution Handoff
 
-After saving the plan, offer execution choice:
+After saving the plan, hand off directly — do not ask the user to choose an execution approach:
 
-**"Plan complete and saved to `docs/superpowers/plans/<filename>.md`. Two execution options:**
+**"Plan complete and saved to `docs/superpowers/plans/<filename>.md`. Continuing with qskill-executing-plans."**
 
-**1. Subagent-Driven (recommended)** - I dispatch a fresh subagent per task, review between tasks, fast iteration
-
-**2. Inline Execution** - Execute tasks in this session using executing-plans, batch execution with checkpoints
-
-**Which approach?"**
-
-**If Subagent-Driven chosen:**
-- **REQUIRED REFERENCE:** Follow [subagent-driven-development](../qskill-executing-plans/references/subagent-driven-development.md)
-- Fresh subagent per task + two-stage review
-
-**If Inline Execution chosen:**
-- **REQUIRED SKILL:** Use qskill-executing-plans
-- Batch execution with checkpoints for review
+- **REQUIRED SKILL:** Use qskill-executing-plans.
+- qskill-executing-plans works inline on the current branch by default — no worktree, no new branch. If the current branch is `main`/`master` or otherwise unsuitable, it stops and asks the user before creating one; no extra confirmation is needed here.

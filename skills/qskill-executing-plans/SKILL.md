@@ -11,7 +11,7 @@ Load plan, review critically, execute all tasks, report when complete.
 
 **Announce at start:** "I'm using the qskill-executing-plans skill to implement this plan."
 
-**Note:** This workflow works much better when you have subagents (Claude Code, Codex CLI, Codex App, Copilot CLI, and Gemini CLI all qualify). If subagents are available, follow [references/subagent-driven-development.md](references/subagent-driven-development.md) instead of the process below, and tell your human partner why.
+**Default:** Follow the process below — inline, on the current branch. Only switch to [references/subagent-driven-development.md](references/subagent-driven-development.md) when the user explicitly asks to use subagents for this execution; do not default into it just because subagents are available (subagent-driven execution creates a worktree per task, which is not the default workspace).
 
 **Reference docs** (read on demand, they are not standalone skills):
 - [references/subagent-driven-development.md](references/subagent-driven-development.md) — same-session execution via subagents
