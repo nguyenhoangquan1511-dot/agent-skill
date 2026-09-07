@@ -44,7 +44,10 @@ override it:
   sentences to a few short paragraphs), and STOP. Implementation
   starts only after your human partner says yes to that design — a
   bounded task's approval is as hard a gate as an architectural
-  one. No spec file, no implementation plan document.
+  one. No spec file, no implementation plan document — but skipping
+  those documents is itself a decision your human partner must agree
+  to, not one you make silently (see "Skipping Spec/Plan Is Its Own
+  Approval").
 - **Architectural** — new projects, new subsystems, changes that
   restructure how components fit together or alter interfaces others
   depend on. Follow the full process: questions, approaches, sectioned
@@ -53,6 +56,38 @@ override it:
 When in doubt between two paths, take the heavier one. The ratchet is
 one-way: hidden complexity discovered mid-task upgrades the path —
 stop, say so, and step up. Nothing downgrades mid-task.
+
+## Skipping Spec/Plan Is Its Own Approval
+
+The spike and bounded paths skip the written spec and the
+implementation plan. That skip is a decision about process, and it
+belongs to your human partner — never to you alone.
+
+When you classify a task as spike or bounded, you MUST say, in the
+same message, that you intend to work without a spec file and without
+a plan document, and you MUST wait for your human partner to accept
+BOTH things before writing any code:
+
+1. **The path** — that no spec file and no plan document will be written.
+2. **The design itself** — the short design you presented in chat.
+
+A "yes" to the design is not automatically a "yes" to skipping the
+documents; say both out loud so a single answer can cover both
+knowingly. If your human partner asks for a spec, or asks for a plan,
+or is silent on the point, you do NOT get to proceed — treat it as an
+upgrade to the architectural path and follow spec → plan → approval →
+implementation in order.
+
+Announce it in roughly these words before the design:
+
+> "Tôi phân loại đây là bounded: tôi định KHÔNG viết file spec và KHÔNG
+> viết file plan, chỉ trình bày thiết kế ngắn ngay trong chat rồi code.
+> Nếu bạn muốn có spec/plan đầy đủ thì nói, tôi nâng lên architectural.
+> Dưới đây là thiết kế..."
+
+Then STOP. Never present the design and start implementing in the same
+turn. Never treat an earlier approval — of another task, of a spike,
+of the classification alone — as approval to code.
 
 ## Anti-Pattern: "Too Simple To Need Approval"
 
@@ -69,6 +104,9 @@ artifact, never the approval.
 |---------|---------|
 | "This is too simple to need a design" | Simple means a short design, not no design. Two sentences in chat, then approval. |
 | "I'll call it bounded and skip the spec" | Reaching for a label to skip work IS the doubt — take the heavier path. |
+| "Bounded means no spec/plan, so I just don't write them" | Not writing them is a choice your partner must agree to. Announce the skip, then wait. |
+| "They said yes to the design, so the missing spec is fine" | Two things need the yes: skipping the documents, and the design. Say both out loud. |
+| "They didn't ask for a spec, so they don't want one" | Silence is not consent. No explicit yes means you upgrade to architectural, not that you code. |
 | "It's bounded and the design is obvious — I'll start while they read it" | The gate is the approval, not the design's length. Present, then stop until you hear yes. |
 | "I understand this kind of app, so it's bounded" | Bounded measures the repo, not your familiarity. A new project has no existing flow — it is architectural. |
 | "The spike works, so I'll keep the code" | A spike's output is an answer. Keeping the code is a new request — classify it. |
@@ -82,17 +120,19 @@ your path and complete them in order.
 
 **Spike:**
 1. **Explore project context** — enough to frame the probe
-2. **Present question + probe plan** — 2-3 sentences
-3. **Get approval** — a nod is enough
-4. **Investigate** — as cheaply as correctness allows
-5. **Report findings** — a recommendation; label anything built as throwaway
+2. **Announce the skip** — say explicitly that no spec file and no plan document will be written
+3. **Present question + probe plan** — 2-3 sentences
+4. **Get approval** — for the skip AND the probe; a nod covering both is enough
+5. **Investigate** — as cheaply as correctness allows
+6. **Report findings** — a recommendation; label anything built as throwaway
 
 **Bounded:**
 1. **Explore project context** — check files, docs, recent commits
 2. **Ask clarifying questions** — one at a time, the ones that matter
-3. **Present short design in chat** — approach, files touched, testing
-4. **Get approval** — STOP and wait for an explicit yes; presenting the design and starting in the same breath is skipping the gate
-5. **Implement** — proceed with the normal development workflow (TDD applies); no plan document
+3. **Announce the skip** — state plainly that you intend to write NO spec file and NO plan document, and that they can ask for the architectural path instead
+4. **Present short design in chat** — approach, files touched, testing
+5. **Get approval for both the skip and the design** — STOP and wait for an explicit yes; presenting the design and starting in the same breath is skipping the gate
+6. **Implement** — proceed with the normal development workflow (TDD applies); no plan document
 
 **Architectural:**
 1. **Explore project context** — check files, docs, recent commits
@@ -112,7 +152,7 @@ digraph brainstorming {
     "Present question + probe (2-3 sentences)" [shape=box];
     "Ask clarifying questions (bounded)" [shape=box];
     "Present short design in chat" [shape=box];
-    "Human approves?" [shape=diamond];
+    "Human approves skip AND design?" [shape=diamond];
     "Investigate; report recommendation" [shape=doublecircle];
     "Implement via normal workflow (no plan doc)" [shape=doublecircle];
     "Explore project context" [shape=box];
@@ -129,11 +169,13 @@ digraph brainstorming {
     "Classify: spike / bounded / architectural" -> "Present question + probe (2-3 sentences)" [label="spike"];
     "Classify: spike / bounded / architectural" -> "Ask clarifying questions (bounded)" [label="bounded"];
     "Classify: spike / bounded / architectural" -> "Explore project context" [label="architectural"];
-    "Present question + probe (2-3 sentences)" -> "Human approves?";
-    "Ask clarifying questions (bounded)" -> "Present short design in chat";
-    "Present short design in chat" -> "Human approves?";
-    "Human approves?" -> "Investigate; report recommendation" [label="spike: yes"];
-    "Human approves?" -> "Implement via normal workflow (no plan doc)" [label="bounded: yes"];
+    "Present question + probe (2-3 sentences)" -> "Human approves skip AND design?";
+    "Announce: no spec file, no plan document" [shape=box];
+    "Ask clarifying questions (bounded)" -> "Announce: no spec file, no plan document";
+    "Announce: no spec file, no plan document" -> "Present short design in chat";
+    "Present short design in chat" -> "Human approves skip AND design?";
+    "Human approves skip AND design?" -> "Investigate; report recommendation" [label="spike: yes"];
+    "Human approves skip AND design?" -> "Implement via normal workflow (no plan doc)" [label="bounded: yes"];
     "Hidden complexity? Upgrade path" -> "Classify: spike / bounded / architectural";
     "Explore project context" -> "Ask clarifying questions";
     "Ask clarifying questions" -> "Propose 2-3 approaches";

@@ -61,7 +61,7 @@ Skill tự phân loại request thành 1 trong 3 nhánh, nói to phân loại đ
 | Nhánh | Khi nào | Kết quả |
 |---|---|---|
 | **Spike** | Câu hỏi khả thi ("có làm được không") | 2-3 câu hỏi + kế hoạch thử, không tạo file spec, không giữ code |
-| **Bounded** | Sửa nhỏ trên flow **đã có sẵn** trong repo | Thiết kế ngắn ngay trong chat, chờ bạn gật đầu rồi code luôn, không có file plan |
+| **Bounded** | Sửa nhỏ trên flow **đã có sẵn** trong repo | Agent phải nói rõ "sẽ KHÔNG viết spec/plan", trình bày thiết kế ngắn trong chat, chờ bạn đồng ý **cả việc bỏ spec/plan lẫn thiết kế** rồi mới code |
 | **Architectural** | Project/subsystem mới, thay đổi cách các thành phần ghép với nhau | Hỏi từng câu một → đề xuất 2-3 hướng → trình bày thiết kế theo từng phần, duyệt từng phần → ghi file spec |
 
 Nhánh nào cũng phải dừng chờ bạn duyệt trước khi làm tiếp — kể cả việc "đơn giản".
