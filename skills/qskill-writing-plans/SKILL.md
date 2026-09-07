@@ -21,6 +21,10 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 **Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
 - (User preferences for plan location override this default)
 
+**Git gate:** Before writing anything, run `git rev-parse --git-dir`. If this is not a Git repository, STOP and ask the user to initialize Git first — see [commit-convention](../qskill-executing-plans/references/commit-convention.md).
+
+**Plan slug:** the plan filename minus the extension, **date included** — `YYYY-MM-DD-<feature-name>` (`docs/superpowers/plans/2026-09-03-user-auth.md` -> `2026-09-03-user-auth`). Every commit belonging to this plan — the plan commit itself, each task commit, each review commit — must start with `[2026-09-03-user-auth]` so the whole work stream is groupable from `git log --oneline`. Never strip the date: feature names repeat, and two plans named `user-auth` written months apart are different work streams. State the slug explicitly in the plan document header.
+
 ## Scope Check
 
 If the spec covers multiple independent subsystems, it should have been broken into sub-project specs during brainstorming. If it wasn't, suggest breaking this into separate plans — one per subsystem. Each plan should produce working, testable software on its own.
@@ -72,6 +76,10 @@ independently testable deliverable.
 
 **Spec:** [path to the spec/design doc this plan implements — the plan
 argues from the spec, so the spec travels with it; executors read both]
+
+**Plan slug:** `YYYY-MM-DD-<feature-name>` — the plan filename minus the
+extension; every commit for this plan starts with `[YYYY-MM-DD-<feature-name>]`
+in its subject line (see Commit Convention)
 
 ## Global Constraints
 
@@ -210,7 +218,10 @@ Expected: PASS
 
 ```bash
 git add tests/path/test.py src/path/file.py
-git commit -m "feat: add specific feature"
+git commit -m "[<plan-slug>] add specific feature
+
+Plan: docs/superpowers/plans/<plan-file>.md
+Task: 1"
 ```
 ````
 
@@ -254,6 +265,35 @@ plus the signature. Deleting code must not make the plan vaguer; if removing a b
 leaves a requirement open to two readings, tighten the prose instead of restoring it.
 
 If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
+
+## Commit Convention
+
+Every task's Commit step in the plan must use this format — no exceptions:
+
+```
+[<plan-slug>] <short description of what changed>
+
+<optional body: why it changed>
+
+Plan: docs/superpowers/plans/<plan-file>.md
+Task: <task number>
+```
+
+The plan commit itself follows the same rule:
+
+```bash
+git add docs/superpowers/plans/2026-09-03-user-auth.md
+git commit -m "[2026-09-03-user-auth] Add implementation plan for JWT session handling
+
+Plan: docs/superpowers/plans/2026-09-03-user-auth.md"
+```
+
+The slug carries the date; the full path stays in the `Plan:` trailer, never in
+the subject — `git log --oneline` has ~80 columns and the directory prefix is
+identical on every commit.
+
+Commit the plan document as soon as it is written — do not leave it uncommitted
+while implementation starts. Full rules: [commit-convention](../qskill-executing-plans/references/commit-convention.md).
 
 ## Execution Handoff
 

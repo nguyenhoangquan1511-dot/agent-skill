@@ -111,6 +111,51 @@ Cấm tuyệt đối các placeholder kiểu "TBD", "add validation", "tương t
 
 Sau khi lưu plan, skill **handoff thẳng** qua `qskill-executing-plans` — không hỏi chọn cách thực thi. Mặc định thực thi **inline ngay trên nhánh hiện tại** (không tự tạo worktree/branch mới); nếu đang ở `main`/`master` hoặc nhánh không phù hợp, skill tự dừng lại hỏi bạn trước khi tạo branch/worktree. Chỉ khi bạn chủ động yêu cầu dùng subagent, skill mới rẽ sang chế độ Subagent-Driven (mỗi task 1 subagent riêng, dùng worktree cô lập).
 
+## Quy ước commit chung cho mọi skill
+
+Mọi skill có tạo commit (`brainstorming`, `writing-plans`, `executing-plans`, `review-plan`, `review-code`) đều tuân theo cùng một chuẩn, để `git log --oneline` group được commit theo plan mà **không cần đọc nội dung commit**.
+
+**Cổng chặn Git:** trước khi làm bất cứ việc gì sinh ra file, skill chạy `git rev-parse --git-dir`. Nếu thư mục chưa phải Git repo, skill **dừng lại** và yêu cầu bạn khởi tạo Git. Lý do: không có version control thì nhiều plan + nhiều fix dồn chung một working tree, commit sau đó bị bẩn, không tách được theo plan.
+
+**Không để sót file:** mọi file skill tạo/sửa đều phải được commit — trong quá trình chạy hoặc ở cuối, tuỳ skill quy định. Trước khi báo hoàn thành, skill kiểm tra `git status --porcelain` phải sạch.
+
+**Format commit message:**
+
+```
+[<plan-slug>] <mô tả ngắn cái gì đã đổi>   # vd: [2026-09-03-user-auth] Rotate refresh token
+
+<body tuỳ chọn: vì sao đổi>
+
+Plan: docs/superpowers/plans/<plan-file>.md
+Task: <số task>
+```
+
+**Plan slug** là tên file plan bỏ đuôi file, **giữ nguyên ngày**:
+
+| Artifact | Slug |
+|---|---|
+| `docs/superpowers/plans/2026-09-03-user-auth.md` | `2026-09-03-user-auth` |
+| `docs/superpowers/specs/2026-09-03-user-auth-design.md` | `2026-09-03-user-auth` |
+| Không có plan/spec (chore, tooling, docs) | `chore-YYYY-MM-DD` |
+
+**Ngày là bắt buộc, không được cắt bỏ.** Tên feature hay bị trùng — hai plan `user-auth` viết cách nhau vài tháng là hai work stream khác nhau, khác task; bỏ ngày đi thì `git log --grep` gộp chung cả hai, group mất tác dụng. Với file spec chỉ bỏ hậu tố `-design`, không bỏ ngày.
+
+Slug **không đổi** suốt work stream: commit spec, commit plan, các commit implement, các commit review đều dùng chung một slug.
+
+**Vì sao path nằm ở body chứ không phải subject:** slug đã định danh duy nhất plan và tự suy ra được path, trong khi `docs/superpowers/plans/` lặp lại y hệt ở mọi commit và ngốn ~22 trong ~80 cột mà `git log --oneline` hiển thị, đẩy phần mô tả ra ngoài màn hình. Trailer `Plan:` vẫn giữ vì nó ghi path *thật* — phân biệt commit từ spec (`specs/...-design.md`) với commit từ plan (`plans/....md`), và vẫn đúng khi bạn đổi thư mục lưu tài liệu.
+
+**Truy xuất lại:**
+
+```bash
+# toàn bộ 1 work stream (có ngày nên không đụng plan trùng tên ở thời điểm khác)
+git log --oneline --grep '\[2026-09-03-user-auth\]'
+
+# mọi work stream từng đụng tới feature này, xuyên các mốc ngày
+git log --oneline --grep '\[[0-9-]*user-auth\]'
+```
+
+Quy tắc đầy đủ nằm ở `skills/qskill-executing-plans/references/commit-convention.md`.
+
 ## Cách dùng 2 skill review: `qskill-review-plan` và `qskill-review-code`
 
 Hai skill này cùng cơ chế: gọi skill, nói rõ **role** muốn chạy (`review` / `feedback` / `scan`) và artifact cần review (Plan/Spec, hoặc thêm Source Code với `review-code`).

@@ -79,6 +79,19 @@ digraph process {
 }
 ```
 
+## Plan Slug (required before Task 1)
+
+Run `git rev-parse --git-dir` first. If this is not a Git repository, STOP and
+ask the user to initialize Git — do not dispatch any implementer.
+
+Then derive the **plan slug** from the plan filename — extension removed, date
+kept (`docs/superpowers/plans/2026-09-03-user-auth.md` ->
+`2026-09-03-user-auth`; never strip the date) — and pass it,
+together with the plan path, into every implementer and fix subagent prompt as
+`[PLAN_SLUG]` / `[PLAN_PATH]`. Subagents cannot derive the slug — if you omit
+it, the commits lose their grouping key. See
+[commit-convention.md](commit-convention.md).
+
 ## Pre-Flight Plan Review
 
 Before dispatching Task 1, scan the plan once for conflicts:
@@ -384,6 +397,9 @@ Done!
 - Move to next task while the review has open Critical/Important issues
 - Re-dispatch a task the progress ledger already marks complete — check
   the ledger (and `git log`) after any compaction or resume
+- Dispatch an implementer without `[PLAN_SLUG]` / `[PLAN_PATH]` filled in —
+  the resulting commits cannot be grouped by plan
+- Finish with work left uncommitted (`git status --porcelain` must be clean)
 
 **If subagent asks questions:**
 - Answer clearly and completely

@@ -663,6 +663,12 @@ Which do you want?
 
 # Git Integration
 
+Git is mandatory. Before starting an execution, run `git rev-parse --git-dir`.
+If the working directory is not a Git repository, STOP and ask the user to
+initialize Git before any review or feedback work begins. Without version
+control, several plans and fixes accumulate in one working tree and the
+resulting commits cannot be separated per work stream.
+
 Every completed execution must end with exactly one Git commit.
 
 This applies to
@@ -693,6 +699,10 @@ Do not create a commit if
 - unresolved work remains
 - the task is incomplete
 
+Nothing produced by the execution may be left uncommitted. Before reporting
+completion, run `git status --porcelain` — anything still listed is unfinished
+work: commit it or report it explicitly.
+
 ---
 
 # Git Baseline
@@ -717,9 +727,51 @@ The final validation must still review the complete artifact.
 
 # Commit Message
 
-Use a descriptive commit message.
+Every commit must carry the **plan slug** in its subject line so Git history can
+be grouped without reading commit bodies or diffs.
 
-The commit message should describe
+Format
+
+```
+[<plan-slug>] <short description of what changed>
+
+<optional body: why it changed>
+
+Plan: docs/superpowers/plans/<plan-file>.md
+```
+
+The plan slug is the plan filename with the date kept and only the extension
+removed — `YYYY-MM-DD-<feature-name>`.
+
+- `docs/superpowers/plans/2026-09-03-user-auth.md` -> `2026-09-03-user-auth`
+- `docs/superpowers/specs/2026-09-03-user-auth-design.md` -> `2026-09-03-user-auth`
+- no plan and no spec -> `chore-YYYY-MM-DD`
+
+**Never strip the date.** Feature names repeat across time; two `user-auth`
+plans written months apart are different work streams and must not collapse
+into one `git log --grep` result. Drop only the trailing `-design` from spec
+filenames.
+
+The slug is identical to the one used by the spec commit, the plan commit and
+every implementation commit of the same work stream, so
+`git log --oneline --grep '\[2026-09-03-user-auth\]'` returns all of them.
+
+The full document path stays in the `Plan:` trailer, not the subject — the slug
+already identifies the plan, and repeating the directory in every subject eats
+the width `git log --oneline` has for the actual description.
+
+Example
+
+```
+[2026-09-03-user-auth] Resolve review findings on token rotation
+
+- tighten the expiry rule in Task 3
+- record the findings in the review report
+
+Plan: docs/superpowers/plans/2026-09-03-user-auth.md
+```
+
+After the prefix, the message must still describe
 
 - what changed
 - why it changed
@@ -729,6 +781,8 @@ Avoid generic messages such as
 - update
 - fix
 - changes
+
+Full rules: [commit-convention](../qskill-executing-plans/references/commit-convention.md).
 
 ---
 

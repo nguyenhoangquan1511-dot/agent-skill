@@ -2,6 +2,12 @@
 
 Use this template when dispatching an implementer subagent.
 
+Placeholders `[PLAN_SLUG]` (plan filename with the extension removed and the
+date kept, e.g. `2026-09-03-user-auth`) and `[PLAN_PATH]` (full plan file path)
+must be filled in by
+the controller — the subagent cannot derive them. See
+[commit-convention.md](commit-convention.md).
+
 ```
 Subagent (general-purpose):
   description: "Implement Task N: [task name]"
@@ -35,9 +41,26 @@ Subagent (general-purpose):
     1. Implement exactly what the task specifies
     2. Write tests (following TDD if task says to)
     3. Verify implementation works
-    4. Commit your work
+    4. Commit your work (see Commit Format below)
     5. Self-review (see below)
     6. Report back
+
+    ## Commit Format
+
+    Every commit you make must start with the plan slug so history can be
+    grouped from `git log --oneline` alone:
+
+    ```
+    [PLAN_SLUG] <short description of what changed>
+
+    <optional body: why it changed>
+
+    Plan: [PLAN_PATH]
+    Task: N
+    ```
+
+    Leave nothing uncommitted — `git status --porcelain` must be clean (apart
+    from deliberately ignored files) before you report back.
 
     Work from: [directory]
 

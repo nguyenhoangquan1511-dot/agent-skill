@@ -139,7 +139,7 @@ your path and complete them in order.
 2. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 3. **Propose 2-3 approaches** — with trade-offs and your recommendation
 4. **Present design** — in sections scaled to their complexity, get user approval after each section
-5. **Write design doc** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit
+5. **Write design doc** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit it as `[<plan-slug>] ...` (see After the Design)
 6. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
 7. **User reviews written spec** — ask user to review the spec file before proceeding
 8. **Transition to implementation** — invoke writing-plans skill to create implementation plan
@@ -351,7 +351,33 @@ condition, then expected result.
 
 - Write the validated design (spec) to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
   - (User preferences for spec location override this default)
-- Commit the design document to git
+- Commit the design document to git — immediately, not later
+
+**Git gate:** Before writing the spec file, run `git rev-parse --git-dir`. If this
+is not a Git repository, STOP and ask the user to initialize Git first. Without
+version control, several specs and fixes pile up in one working tree and the
+resulting commits are impossible to group per work stream.
+
+**Commit format:** the **plan slug** is the spec filename minus `-design` and the
+extension, **with the date kept** — `YYYY-MM-DD-<topic>`
+(`2026-09-03-user-auth-design.md` -> `2026-09-03-user-auth`). Never strip the
+date: topic names repeat, and two `user-auth` specs written months apart are
+different work streams. The spec commit, the plan commit, every implementation
+commit and every review commit reuse this slug, so
+`git log --oneline --grep '\[2026-09-03-user-auth\]'` returns the entire stream.
+
+```bash
+git add docs/superpowers/specs/2026-09-03-user-auth-design.md
+git commit -m "[2026-09-03-user-auth] Add design spec for JWT session handling
+
+Plan: docs/superpowers/specs/2026-09-03-user-auth-design.md"
+```
+
+The full path belongs in the `Plan:` trailer, not the subject — the slug already
+identifies the document, and the directory prefix would eat the width
+`git log --oneline` has for the description.
+
+Full rules: [commit-convention](../qskill-executing-plans/references/commit-convention.md).
 
 **Spec Self-Review:**
 After writing the spec document, look at it with fresh eyes:
