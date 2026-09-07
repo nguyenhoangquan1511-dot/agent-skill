@@ -57,6 +57,40 @@ When in doubt between two paths, take the heavier one. The ratchet is
 one-way: hidden complexity discovered mid-task upgrades the path —
 stop, say so, and step up. Nothing downgrades mid-task.
 
+## Commits Apply To All Three Paths
+
+**Read this while you classify — the commit rules bind every path, not just
+the architectural one.** Skipping the spec and the plan does not skip the
+commit; a bounded fix landing uncommitted is exactly the mess this rule exists
+to prevent.
+
+**Git gate, before any path starts:** run `git rev-parse --git-dir`. If this is
+not a Git repository, STOP and ask the user to initialize Git. Do not probe, do
+not implement, do not write a spec. Without version control, several tasks pile
+up in one working tree and the commits that eventually get made are dirty.
+
+**Slug per path** — the subject prefix `[<plan-slug>]` is required either way:
+
+| Path | Slug | What gets committed |
+|---|---|---|
+| **Spike** | `chore-YYYY-MM-DD` | Nothing, if the probe was truly throwaway — delete it. Anything you keep (a script, a note, a dependency bump) gets committed before you report findings. |
+| **Bounded** | `chore-YYYY-MM-DD` | Every file the implementation touched. No spec and no plan exist, so `chore-<today>` is the slug and the `Plan:` trailer is omitted. |
+| **Architectural** | `YYYY-MM-DD-<topic>` from the spec filename | The spec document, immediately after writing it (see After the Design). |
+
+For the two chore paths:
+
+```bash
+git add <files>
+git commit -m "[chore-2026-09-03] Reject expired refresh tokens at the guard
+
+Bounded fix, no spec or plan document by agreement with the user."
+```
+
+**Before reporting done on any path**, run `git status --porcelain`. Anything
+still listed is unfinished work: commit it, or say explicitly what you left
+uncommitted and why. Full rules:
+[commit-convention](../qskill-executing-plans/references/commit-convention.md).
+
 ## Skipping Spec/Plan Is Its Own Approval
 
 The spike and bounded paths skip the written spec and the
@@ -112,6 +146,9 @@ artifact, never the approval.
 | "The spike works, so I'll keep the code" | A spike's output is an answer. Keeping the code is a new request — classify it. |
 | "It grew, but I'm almost done — no need to re-classify" | Hidden complexity upgrades the path mid-task. Stop and say so. |
 | "They approved the spike, so the follow-up change is approved too" | Each task gets its own classification and its own approval. |
+| "No spec and no plan, so there is no slug to commit with" | Spike and bounded both use `chore-YYYY-MM-DD`. No document never means no commit. |
+| "It's a bounded one-file fix — the user can commit it" | The path that writes the file commits the file. Leaving it dirty is what makes later history unreadable. |
+| "The spike code is throwaway, so I'll just leave it lying around" | Throwaway means deleted. Anything still on disk gets committed. |
 
 ## Checklist
 
@@ -124,7 +161,8 @@ your path and complete them in order.
 3. **Present question + probe plan** — 2-3 sentences
 4. **Get approval** — for the skip AND the probe; a nod covering both is enough
 5. **Investigate** — as cheaply as correctness allows
-6. **Report findings** — a recommendation; label anything built as throwaway
+6. **Commit or delete what you built** — throwaway probes get deleted; anything kept is committed as `[chore-YYYY-MM-DD]`, then `git status --porcelain` must be clean
+7. **Report findings** — a recommendation; label anything built as throwaway
 
 **Bounded:**
 1. **Explore project context** — check files, docs, recent commits
@@ -133,6 +171,7 @@ your path and complete them in order.
 4. **Present short design in chat** — approach, files touched, testing
 5. **Get approval for both the skip and the design** — STOP and wait for an explicit yes; presenting the design and starting in the same breath is skipping the gate
 6. **Implement** — proceed with the normal development workflow (TDD applies); no plan document
+7. **Commit** — every file touched, subject `[chore-YYYY-MM-DD] <what changed>`; no `Plan:` trailer since there is no plan document; verify `git status --porcelain` is clean before reporting done
 
 **Architectural:**
 1. **Explore project context** — check files, docs, recent commits
@@ -353,10 +392,8 @@ condition, then expected result.
   - (User preferences for spec location override this default)
 - Commit the design document to git — immediately, not later
 
-**Git gate:** Before writing the spec file, run `git rev-parse --git-dir`. If this
-is not a Git repository, STOP and ask the user to initialize Git first. Without
-version control, several specs and fixes pile up in one working tree and the
-resulting commits are impossible to group per work stream.
+The Git gate from "Commits Apply To All Three Paths" has already been cleared by
+this point — if it has not, stop and clear it now.
 
 **Commit format:** the **plan slug** is the spec filename minus `-design` and the
 extension, **with the date kept** — `YYYY-MM-DD-<topic>`

@@ -142,6 +142,8 @@ Task: <số task>
 
 Slug **không đổi** suốt work stream: commit spec, commit plan, các commit implement, các commit review đều dùng chung một slug.
 
+Với `qskill-brainstorming`, hai nhánh **spike** và **bounded** cố tình không sinh spec/plan — nhưng vẫn **bắt buộc commit**, dùng slug `chore-YYYY-MM-DD` và bỏ trailer `Plan:`. Không có tài liệu không đồng nghĩa với không commit.
+
 **Vì sao path nằm ở body chứ không phải subject:** slug đã định danh duy nhất plan và tự suy ra được path, trong khi `docs/superpowers/plans/` lặp lại y hệt ở mọi commit và ngốn ~22 trong ~80 cột mà `git log --oneline` hiển thị, đẩy phần mô tả ra ngoài màn hình. Trailer `Plan:` vẫn giữ vì nó ghi path *thật* — phân biệt commit từ spec (`specs/...-design.md`) với commit từ plan (`plans/....md`), và vẫn đúng khi bạn đổi thư mục lưu tài liệu.
 
 **Truy xuất lại:**
