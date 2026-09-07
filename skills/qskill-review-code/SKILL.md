@@ -12,10 +12,11 @@ description: Review and continuously improve source code implementation against 
 
 Review and continuously improve source code implementation through iterative review cycles.
 
-This skill has two execution modes:
+This skill has three execution modes:
 
 - review
 - feedback
+- scan
 
 The Code Review Report is a living document.
 
@@ -50,6 +51,20 @@ Responsibilities
 - Synchronize the review report with every code change.
 
 Feedback MUST update BOTH the source code and the review report.
+
+---
+
+## scan
+
+Responsibilities
+
+- Analyze the implementation as thoroughly as `review` (full depth, same evidence rules).
+- Compare implementation against the approved Plan.
+- Classify every finding using the Severity Scale.
+- Summarize findings by severity count and list every High/Critical finding.
+- Ask the user to choose exactly one next step: write the review report (`review`), or fix now (resolve directly, without requiring a report entry).
+
+Scan MUST NEVER modify source code or the review report on its own. It ends with a question, not with a report or a code change.
 
 ---
 
@@ -94,6 +109,27 @@ Tests may be updated only when required to keep implementation correct.
 
 ---
 
+## scan
+
+Allowed
+
+- Approved Plan
+- Source Code
+- Existing Code Review Report (for context only)
+
+Must NOT modify
+
+- Approved Plan
+- Source Code
+- Code Review Report
+- Tests
+- Infrastructure
+- Configuration
+
+Scan only produces a severity summary and a decision question. Modifying anything requires continuing into `review` or `feedback`.
+
+---
+
 # Required Inputs
 
 Required
@@ -107,6 +143,24 @@ Optional
 
 If no review report exists, create one.
 Otherwise update the existing report.
+
+---
+
+## Plan Resolution
+
+The Approved Plan may be supplied as an exact file path, a Specification, or a feature/topic name — it does not have to be a path.
+
+When the given value is an existing file path, use it exactly as given — skip the steps below.
+
+When the given value is not an existing file path
+
+1. Inspect the most recent Git commits for files added/modified under `docs/superpowers/plans/` and `docs/superpowers/specs/` matching the given Specification/feature name — a Plan is normally committed right after being written, so this is the primary source.
+2. If nothing matches, search the rest of `docs/` for a file whose name or content matches the given Specification/feature name.
+3. If exactly one candidate matches, use it.
+4. If multiple candidates match, list the candidates and ask the user to pick one. Never guess.
+5. If nothing matches, ask the user to confirm the topic or provide the exact path.
+
+Do not start `review`, `feedback`, or `scan` until the Approved Plan file is confirmed.
 
 ---
 
@@ -207,6 +261,19 @@ Mutable fields
 
 ---
 
+# Severity Scale
+
+| Severity | Criteria |
+|----------|----------|
+| Low | No effect on behavior/outcome — only violates a convention (style, naming, formatting...) |
+| Medium | The current case behaves correctly, but an uncovered case/edge case could fail |
+| High | Deviates from the direction already agreed in the Plan, or blocks the main flow within the scope of the current task |
+| Critical | Impact extends beyond the current task/feature to the whole system: data loss, security vulnerability, breaking another feature. Assign carefully — never by default |
+
+"High or above" means High + Critical.
+
+---
+
 # Issue Lifecycle
 
 OPEN -> RESOLVED
@@ -278,6 +345,22 @@ Otherwise
 
 ---
 
+# Scan Workflow
+
+1. Load the Approved Plan.
+2. Load the Source Code.
+3. Analyze the implementation with the same depth and evidence rules as `review` — do not hold back because the report will not be written yet.
+4. Classify every finding using the Severity Scale. Do not create Issue IDs and do not write the review report at this stage.
+5. Present a summary
+   - Total count broken down by severity (Critical / High / Medium / Low).
+   - If High + Critical > 0, list each one with its Location and a one-line Problem.
+6. Ask the user to choose exactly one
+   - Write the report — reuse the analysis just produced and continue with the `review` Workflow (create Issue IDs, write the report). Do not re-analyze from scratch.
+   - Fix now — reuse the analysis just produced and resolve the findings directly in the source code, following the same per-issue resolution as `feedback` step 4, except creating an Issue ID and writing the review report is optional for this pass. An existing report for this artifact, if any, may optionally note the fix as a supplement to its latest round.
+7. Continue with whichever path was chosen. Scan itself never modifies the source code or the review report.
+
+---
+
 # Feedback Transaction
 
 Processing an issue is atomic.
@@ -308,6 +391,8 @@ Whenever an issue becomes RESOLVED,
 the required code change must already exist.
 
 The task is incomplete if the implementation and review report are inconsistent.
+
+Exception: a `scan` execution that ends in "fix now" is not required to create or update a review report entry for the issues it resolves (see Scan Workflow, step 6).
 
 ---
 
@@ -417,6 +502,7 @@ Invalid examples
 Never
 
 - modify source code during review mode
+- modify source code or the review report during scan mode
 - ignore an OPEN issue
 - recreate the review report
 - write the review report anywhere but `docs/superpowers/reviews/`
@@ -428,7 +514,7 @@ Never
 - delete issues
 - modify immutable fields
 - mark RESOLVED without updating the code
-- update the code without updating the review report
+- update the code without updating the review report (except the `scan` "fix now" path — see Scan Workflow)
 - implement functionality outside the Approved Plan without discussion
 
 ---
@@ -491,16 +577,30 @@ Updated Code Review Report
 
 docs/superpowers/reviews/YYYY-MM-DD-<topic>-review-code.md
 
+## scan
+
+Scan completed.
+
+Summary: Critical: a, High: b, Medium: c, Low: d
+
+<Location + one-line Problem for each High/Critical finding, if any>
+
+Which do you want?
+
+1. Write the review report
+2. Fix now
+
 ---
 
 # Git Integration
 
 Every completed execution must end with exactly one Git commit.
 
-This applies to both
+This applies to
 
 - review
 - feedback
+- scan, only when it continues into `review` or `feedback` — a scan left pending on the user's choice produces no commit
 
 The commit must include every artifact modified during the execution.
 
