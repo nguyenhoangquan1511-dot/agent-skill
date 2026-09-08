@@ -22,11 +22,11 @@ to EVERY task on EVERY path below — the ceremony scales with the task;
 the approval gate never does.
 </HARD-GATE>
 
-## Three Paths
+## Four Paths
 
 Before your first question, classify the request and say the
-classification out loud — "this looks bounded, so I'll present a short
-design here rather than write a spec" — so your human partner can
+classification out loud — "this looks bounded, so I'll go straight to a
+short plan instead of writing a spec" — so your human partner can
 override it:
 
 - **Spike** — a feasibility question ("can we...", "is it possible...",
@@ -35,19 +35,22 @@ override it:
   a nod, then find out as cheaply as correctness allows. No design
   doc, no spec file. Report findings as a recommendation; anything you
   built stays labeled throwaway.
+- **Bug** — một hành vi sai: lỗi runtime, kết quả sai, test fail,
+  regression, thứ từng chạy được mà nay không. Đừng brainstorm thiết
+  kế cho triệu chứng. Dừng path này lại và gọi skill
+  `qskill-systematic-debugging` để tìm root cause trước. Khi đã có root
+  cause, quay lại đây phân loại bản fix (thường là bounded, là
+  architectural nếu phải đổi cấu trúc) rồi đi tiếp theo path đó.
 - **Bounded** — a well-scoped change to code that already exists in
   this repo: a new flag, a small endpoint, a one-file fix.
   Understanding the kind of app is not enough — bounded means the flow
   you are changing is already here to read. If there is no existing
-  flow to change, the task is not bounded. Ask the clarifying
-  questions that matter, present a short design IN CHAT (a few
-  sentences to a few short paragraphs), and STOP. Implementation
-  starts only after your human partner says yes to that design — a
-  bounded task's approval is as hard a gate as an architectural
-  one. No spec file, no implementation plan document — but skipping
-  those documents is itself a decision your human partner must agree
-  to, not one you make silently (see "Skipping Spec/Plan Is Its Own
-  Approval").
+  flow to change, the task is not bounded. Hỏi những câu clarifying
+  thật sự cần; trong chat CHỈ nêu những điểm cần user quyết (câu hỏi,
+  lựa chọn, đánh đổi), không trình bày lại toàn bộ thiết kế. Khi không
+  còn câu hỏi nào, KHÔNG viết spec — gọi thẳng skill
+  `qskill-writing-plans` để viết một plan ngắn; skill đó lo việc ghi
+  file, commit và đưa user review (xem "Bounded Goes To writing-plans").
 - **Architectural** — new projects, new subsystems, changes that
   restructure how components fit together or alter interfaces others
   depend on. Follow the full process: questions, approaches, sectioned
@@ -57,12 +60,12 @@ When in doubt between two paths, take the heavier one. The ratchet is
 one-way: hidden complexity discovered mid-task upgrades the path —
 stop, say so, and step up. Nothing downgrades mid-task.
 
-## Commits Apply To All Three Paths
+## Commits Apply To Every Path
 
 **Read this while you classify — the commit rules bind every path, not just
-the architectural one.** Skipping the spec and the plan does not skip the
-commit; a bounded fix landing uncommitted is exactly the mess this rule exists
-to prevent.
+the architectural one.** Skipping the full spec does not skip the commit; a
+bounded fix landing uncommitted is exactly the mess this rule exists to
+prevent.
 
 **Git gate, before any path starts:** run `git rev-parse --git-dir`. If this is
 not a Git repository, STOP and ask the user to initialize Git. Do not probe, do
@@ -74,61 +77,59 @@ up in one working tree and the commits that eventually get made are dirty.
 | Path | Slug | What gets committed |
 |---|---|---|
 | **Spike** | `chore-YYYY-MM-DD` | Nothing, if the probe was truly throwaway — delete it. Anything you keep (a script, a note, a dependency bump) gets committed before you report findings. |
-| **Bounded** | `chore-YYYY-MM-DD` | Every file the implementation touched. No spec and no plan exist, so `chore-<today>` is the slug and the `Plan:` trailer is omitted. |
+| **Bug** | theo path bản fix | Bug path tự nó không commit gì; nó kết thúc ở root cause. Bản fix commit theo path mà nó được phân loại lại (bounded hoặc architectural). |
+| **Bounded** | `YYYY-MM-DD-<feature>` từ tên file plan | Theo luật của qskill-writing-plans / qskill-executing-plans: plan document trước, rồi từng task. `Plan:` trailer trỏ tới file plan. |
 | **Architectural** | `YYYY-MM-DD-<topic>` from the spec filename | The spec document, immediately after writing it (see After the Design). |
 
-For the two chore paths:
+Spike (chore slug, no document):
 
 ```bash
 git add <files>
-git commit -m "[chore-2026-09-03] Reject expired refresh tokens at the guard
+git commit -m "[chore-2026-09-03] Keep the token-expiry probe script
 
-Bounded fix, no spec or plan document by agreement with the user."
+Throwaway spike kept at the user's request; no spec or plan document."
 ```
+
+Bounded: không commit tay ở đây — skill `qskill-writing-plans` commit
+plan document và `qskill-executing-plans` commit từng task, cùng slug lấy
+từ tên file plan.
 
 **Before reporting done on any path**, run `git status --porcelain`. Anything
 still listed is unfinished work: commit it, or say explicitly what you left
 uncommitted and why. Full rules:
 [commit-convention](../qskill-executing-plans/references/commit-convention.md).
 
-## Skipping Spec/Plan Is Its Own Approval
+## Bounded Goes To writing-plans
 
-The spike and bounded paths skip the written spec and the
-implementation plan. That skip is a decision about process, and it
-belongs to your human partner — never to you alone.
+Bounded không viết spec, nhưng vẫn phải để lại tài liệu — và tài liệu đó
+là **plan**, không phải một loại file riêng.
 
-When you classify a task as spike or bounded, you MUST say, in the
-same message, that you intend to work without a spec file and without
-a plan document, and you MUST wait for your human partner to accept
-BOTH things before writing any code:
+Lý do: một task bounded vẫn có thể kéo dài nhiều session. Session sau mở
+lên, user chạy `qskill-executing-plans` để làm tiếp; skill đó chỉ đọc
+plan document ở `docs/superpowers/plans/`. Nếu thiết kế nằm trong một
+file spec hay brief riêng thì không có gì để execute — nên bounded và
+architectural cùng đổ về một dạng tài liệu duy nhất.
 
-1. **The path** — that no spec file and no plan document will be written.
-2. **The design itself** — the short design you presented in chat.
+**Khi hết câu hỏi:** nói ngắn gọn rằng bạn chuyển sang viết plan, rồi
+invoke skill `qskill-writing-plans`. Kể từ đó, mọi thứ — nội dung plan,
+đường dẫn file, slug, commit, gate user review, bàn giao sang
+`qskill-executing-plans` — theo đúng luật của skill đó. Đừng lặp lại hay
+tự chế biến những luật đó ở đây.
 
-A "yes" to the design is not automatically a "yes" to skipping the
-documents; say both out loud so a single answer can cover both
-knowingly. If your human partner asks for a spec, or asks for a plan,
-or is silent on the point, you do NOT get to proceed — treat it as an
-upgrade to the architectural path and follow spec → plan → approval →
-implementation in order.
+**Khác biệt duy nhất so với architectural:** bounded không có spec
+document, nên trong plan header, trường `Spec:` ghi `không có (bounded
+task)` kèm một hai câu tóm tắt yêu cầu và lý do chọn cách làm này — đó là
+mốc để sau này đọc lại và biết vì sao thay đổi được làm như vậy.
 
-Announce it in roughly these words before the design:
-
-> "Tôi phân loại đây là bounded: tôi định KHÔNG viết file spec và KHÔNG
-> viết file plan, chỉ trình bày thiết kế ngắn ngay trong chat rồi code.
-> Nếu bạn muốn có spec/plan đầy đủ thì nói, tôi nâng lên architectural.
-> Dưới đây là thiết kế..."
-
-Then STOP. Never present the design and start implementing in the same
-turn. Never treat an earlier approval — of another task, of a spike,
-of the classification alone — as approval to code.
+**Gate duyệt không đổi:** bạn không code trong lượt trình bày. Plan được
+viết, được commit, user review plan, rồi mới implement.
 
 ## Anti-Pattern: "Too Simple To Need Approval"
 
 Every path ends with your human partner approving your intent before
 implementation. A todo list, a single-function utility, a config
-change — the design may be two sentences in chat, but you MUST present
-it and get approval. "Simple" tasks are where unexamined assumptions
+change — the plan may be a few lines, but you MUST put it in front of
+your human partner and get approval. "Simple" tasks are where unexamined assumptions
 cause the most wasted work. What scales with simplicity is the
 artifact, never the approval.
 
@@ -136,17 +137,19 @@ artifact, never the approval.
 
 | Thought | Reality |
 |---------|---------|
-| "This is too simple to need a design" | Simple means a short design, not no design. Two sentences in chat, then approval. |
+| "This is too simple to need a design" | Simple means a short design, not no design. Một plan ngắn, rồi chờ duyệt. |
 | "I'll call it bounded and skip the spec" | Reaching for a label to skip work IS the doubt — take the heavier path. |
-| "Bounded means no spec/plan, so I just don't write them" | Not writing them is a choice your partner must agree to. Announce the skip, then wait. |
-| "They said yes to the design, so the missing spec is fine" | Two things need the yes: skipping the documents, and the design. Say both out loud. |
-| "They didn't ask for a spec, so they don't want one" | Silence is not consent. No explicit yes means you upgrade to architectural, not that you code. |
+| "Bounded nên khỏi ghi gì lại" | Bounded vẫn ra một plan qua qskill-writing-plans. Session sau còn có cái để execute. |
+| "Thiết kế ngắn nằm trong chat rồi, khỏi viết plan" | Chat không tra cứu được sau ba tháng, và executing-plans không đọc được chat. |
+| "Trình bày lại cả thiết kế trong chat cho chắc" | Chat chỉ để hỏi những gì user phải quyết. Thiết kế nằm trong plan. |
+| "Bounded nhỏ nên tôi tự ghi file thiết kế riêng cho gọn" | Một dạng tài liệu duy nhất: plan. File riêng là file không skill nào chạy được. |
+| "Nó chỉ là bug nhỏ, tôi đoán được chỗ sai" | Bug đi qua qskill-systematic-debugging trước. Đoán không phải root cause. |
 | "It's bounded and the design is obvious — I'll start while they read it" | The gate is the approval, not the design's length. Present, then stop until you hear yes. |
 | "I understand this kind of app, so it's bounded" | Bounded measures the repo, not your familiarity. A new project has no existing flow — it is architectural. |
 | "The spike works, so I'll keep the code" | A spike's output is an answer. Keeping the code is a new request — classify it. |
 | "It grew, but I'm almost done — no need to re-classify" | Hidden complexity upgrades the path mid-task. Stop and say so. |
 | "They approved the spike, so the follow-up change is approved too" | Each task gets its own classification and its own approval. |
-| "No spec and no plan, so there is no slug to commit with" | Spike and bounded both use `chore-YYYY-MM-DD`. No document never means no commit. |
+| "Không có spec nên không có slug để commit" | Spike dùng `chore-YYYY-MM-DD`; bounded dùng slug lấy từ tên file plan. Không có document không bao giờ nghĩa là không commit. |
 | "It's a bounded one-file fix — the user can commit it" | The path that writes the file commits the file. Leaving it dirty is what makes later history unreadable. |
 | "The spike code is throwaway, so I'll just leave it lying around" | Throwaway means deleted. Anything still on disk gets committed. |
 
@@ -157,21 +160,23 @@ your path and complete them in order.
 
 **Spike:**
 1. **Explore project context** — enough to frame the probe
-2. **Announce the skip** — say explicitly that no spec file and no plan document will be written
-3. **Present question + probe plan** — 2-3 sentences
-4. **Get approval** — for the skip AND the probe; a nod covering both is enough
-5. **Investigate** — as cheaply as correctness allows
-6. **Commit or delete what you built** — throwaway probes get deleted; anything kept is committed as `[chore-YYYY-MM-DD]`, then `git status --porcelain` must be clean
-7. **Report findings** — a recommendation; label anything built as throwaway
+2. **Present question + probe plan** — 2-3 sentences
+3. **Get approval** — a nod on the probe is enough
+4. **Investigate** — as cheaply as correctness allows
+5. **Commit or delete what you built** — throwaway probes get deleted; anything kept is committed as `[chore-YYYY-MM-DD]`, then `git status --porcelain` must be clean
+6. **Report findings** — a recommendation; label anything built as throwaway
+
+**Bug:**
+1. **Invoke `qskill-systematic-debugging`** — trước mọi thứ khác; không đoán, không vá triệu chứng
+2. **Report root cause** — nói rõ nguyên nhân thật và bằng chứng
+3. **Re-classify the fix** — bounded hay architectural, rồi chạy đúng checklist của path đó (kể cả gate duyệt và tài liệu plan)
 
 **Bounded:**
 1. **Explore project context** — check files, docs, recent commits
 2. **Ask clarifying questions** — one at a time, the ones that matter
-3. **Announce the skip** — state plainly that you intend to write NO spec file and NO plan document, and that they can ask for the architectural path instead
-4. **Present short design in chat** — approach, files touched, testing
-5. **Get approval for both the skip and the design** — STOP and wait for an explicit yes; presenting the design and starting in the same breath is skipping the gate
-6. **Implement** — proceed with the normal development workflow (TDD applies); no plan document
-7. **Commit** — every file touched, subject `[chore-YYYY-MM-DD] <what changed>`; no `Plan:` trailer since there is no plan document; verify `git status --porcelain` is clean before reporting done
+3. **Chỉ nêu trong chat những điểm cần user quyết** — câu hỏi mở, lựa chọn phương án, đánh đổi; không trình bày lại toàn bộ thiết kế
+4. **Invoke qskill-writing-plans** — khi hết câu hỏi; plan ngắn, `Spec:` ghi `không có (bounded task)` kèm tóm tắt yêu cầu và lý do chọn cách làm
+5. **Từ đây theo luật của skill đó** — nó lo file plan, slug, commit, gate user review plan, rồi bàn giao sang qskill-executing-plans
 
 **Architectural:**
 1. **Explore project context** — check files, docs, recent commits
@@ -187,13 +192,15 @@ your path and complete them in order.
 
 ```dot
 digraph brainstorming {
-    "Classify: spike / bounded / architectural" [shape=diamond];
+    "Classify: spike / bug / bounded / architectural" [shape=diamond];
+    "Invoke qskill-systematic-debugging" [shape=box];
+    "Report root cause; re-classify the fix" [shape=box];
     "Present question + probe (2-3 sentences)" [shape=box];
     "Ask clarifying questions (bounded)" [shape=box];
-    "Present short design in chat" [shape=box];
-    "Human approves skip AND design?" [shape=diamond];
+    "Nêu điểm cần user quyết" [shape=box];
+    "Invoke writing-plans skill (bounded)" [shape=doublecircle];
+    "Human approves probe?" [shape=diamond];
     "Investigate; report recommendation" [shape=doublecircle];
-    "Implement via normal workflow (no plan doc)" [shape=doublecircle];
     "Explore project context" [shape=box];
     "Ask clarifying questions" [shape=box];
     "Propose 2-3 approaches" [shape=box];
@@ -205,17 +212,17 @@ digraph brainstorming {
     "Invoke writing-plans skill" [shape=doublecircle];
     "Hidden complexity? Upgrade path" [shape=box];
 
-    "Classify: spike / bounded / architectural" -> "Present question + probe (2-3 sentences)" [label="spike"];
-    "Classify: spike / bounded / architectural" -> "Ask clarifying questions (bounded)" [label="bounded"];
-    "Classify: spike / bounded / architectural" -> "Explore project context" [label="architectural"];
-    "Present question + probe (2-3 sentences)" -> "Human approves skip AND design?";
-    "Announce: no spec file, no plan document" [shape=box];
-    "Ask clarifying questions (bounded)" -> "Announce: no spec file, no plan document";
-    "Announce: no spec file, no plan document" -> "Present short design in chat";
-    "Present short design in chat" -> "Human approves skip AND design?";
-    "Human approves skip AND design?" -> "Investigate; report recommendation" [label="spike: yes"];
-    "Human approves skip AND design?" -> "Implement via normal workflow (no plan doc)" [label="bounded: yes"];
-    "Hidden complexity? Upgrade path" -> "Classify: spike / bounded / architectural";
+    "Classify: spike / bug / bounded / architectural" -> "Present question + probe (2-3 sentences)" [label="spike"];
+    "Classify: spike / bug / bounded / architectural" -> "Invoke qskill-systematic-debugging" [label="bug"];
+    "Classify: spike / bug / bounded / architectural" -> "Ask clarifying questions (bounded)" [label="bounded"];
+    "Classify: spike / bug / bounded / architectural" -> "Explore project context" [label="architectural"];
+    "Invoke qskill-systematic-debugging" -> "Report root cause; re-classify the fix";
+    "Report root cause; re-classify the fix" -> "Classify: spike / bug / bounded / architectural";
+    "Present question + probe (2-3 sentences)" -> "Human approves probe?";
+    "Ask clarifying questions (bounded)" -> "Nêu điểm cần user quyết";
+    "Nêu điểm cần user quyết" -> "Invoke writing-plans skill (bounded)" [label="hết câu hỏi"];
+    "Human approves probe?" -> "Investigate; report recommendation" [label="yes"];
+    "Hidden complexity? Upgrade path" -> "Classify: spike / bug / bounded / architectural";
     "Explore project context" -> "Ask clarifying questions";
     "Ask clarifying questions" -> "Propose 2-3 approaches";
     "Propose 2-3 approaches" -> "Present design sections";
@@ -231,10 +238,10 @@ digraph brainstorming {
 
 **Terminal states are path-bound.** Architectural: the ONLY skill you
 invoke after brainstorming is qskill-writing-plans — never any other
-implementation skill. Bounded: after
-approval, implementation proceeds directly through the normal
-development workflow; no plan document. Spike: the terminal state is a
-reported recommendation.
+implementation skill. Bounded: cũng kết thúc ở qskill-writing-plans —
+chỉ khác là không có spec document đi trước. Spike: the terminal
+state is a reported recommendation. Bug: the terminal state is a root
+cause plus a re-classification — the fix runs on its own path.
 
 ## The Process
 
@@ -392,7 +399,7 @@ condition, then expected result.
   - (User preferences for spec location override this default)
 - Commit the design document to git — immediately, not later
 
-The Git gate from "Commits Apply To All Three Paths" has already been cleared by
+The Git gate from "Commits Apply To Every Path" has already been cleared by
 this point — if it has not, stop and clear it now.
 
 **Commit format:** the **plan slug** is the spec filename minus `-design` and the
