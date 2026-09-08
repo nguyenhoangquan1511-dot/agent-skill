@@ -5,8 +5,8 @@ description: "You MUST use this before any creative work - creating features, bu
 
 # Brainstorming Ideas Into Designs
 
-**Ngôn ngữ:** Viết tài liệu spec bằng tiếng Việt — tiêu đề, diễn giải, business rule, edge case, tên test case.
-**Ngôn ngữ:** Trao đổi với user bằng tiếng Việt. Giữ nguyên code, identifier, đường dẫn file, câu lệnh và tên type ở dạng gốc.
+**Language:** Write spec documents in Vietnamese — headings, prose, business rules, edge cases, test case names.
+**Language:** Talk to the user in Vietnamese. Keep code, identifiers, file paths, commands and type names in their original form.
 
 Help turn ideas into fully formed designs and specs through natural collaborative dialogue.
 
@@ -35,22 +35,24 @@ override it:
   a nod, then find out as cheaply as correctness allows. No design
   doc, no spec file. Report findings as a recommendation; anything you
   built stays labeled throwaway.
-- **Bug** — một hành vi sai: lỗi runtime, kết quả sai, test fail,
-  regression, thứ từng chạy được mà nay không. Đừng brainstorm thiết
-  kế cho triệu chứng. Dừng path này lại và gọi skill
-  `qskill-systematic-debugging` để tìm root cause trước. Khi đã có root
-  cause, quay lại đây phân loại bản fix (thường là bounded, là
-  architectural nếu phải đổi cấu trúc) rồi đi tiếp theo path đó.
+- **Bug** — wrong behavior: a runtime error, a wrong result, a failing
+  test, a regression, something that used to work and no longer does.
+  Do not brainstorm a design for a symptom. Stop this path and invoke
+  the `qskill-systematic-debugging` skill to find the root cause first.
+  With the root cause in hand, come back here, classify the fix
+  (usually bounded; architectural if the structure has to change), and
+  continue on that path.
 - **Bounded** — a well-scoped change to code that already exists in
   this repo: a new flag, a small endpoint, a one-file fix.
   Understanding the kind of app is not enough — bounded means the flow
   you are changing is already here to read. If there is no existing
-  flow to change, the task is not bounded. Hỏi những câu clarifying
-  thật sự cần; trong chat CHỈ nêu những điểm cần user quyết (câu hỏi,
-  lựa chọn, đánh đổi), không trình bày lại toàn bộ thiết kế. Khi không
-  còn câu hỏi nào, KHÔNG viết spec — gọi thẳng skill
-  `qskill-writing-plans` để viết một plan ngắn; skill đó lo việc ghi
-  file, commit và đưa user review (xem "Bounded Goes To writing-plans").
+  flow to change, the task is not bounded. Ask the clarifying questions
+  that matter; in chat raise ONLY what your human partner has to decide
+  (open questions, choices, trade-offs) — do not restate the whole
+  design there. Once no questions are left, do NOT write a spec: invoke
+  the `qskill-writing-plans` skill to write a short plan, and let that
+  skill handle the file, the commit and the review gate (see "Bounded
+  Goes To writing-plans").
 - **Architectural** — new projects, new subsystems, changes that
   restructure how components fit together or alter interfaces others
   depend on. Follow the full process: questions, approaches, sectioned
@@ -77,8 +79,8 @@ up in one working tree and the commits that eventually get made are dirty.
 | Path | Slug | What gets committed |
 |---|---|---|
 | **Spike** | `chore-YYYY-MM-DD` | Nothing, if the probe was truly throwaway — delete it. Anything you keep (a script, a note, a dependency bump) gets committed before you report findings. |
-| **Bug** | theo path bản fix | Bug path tự nó không commit gì; nó kết thúc ở root cause. Bản fix commit theo path mà nó được phân loại lại (bounded hoặc architectural). |
-| **Bounded** | `YYYY-MM-DD-<feature>` từ tên file plan | Theo luật của qskill-writing-plans / qskill-executing-plans: plan document trước, rồi từng task. `Plan:` trailer trỏ tới file plan. |
+| **Bug** | whatever the fix's path uses | The bug path commits nothing of its own; it ends at a root cause. The fix commits under the path it was re-classified into (bounded or architectural). |
+| **Bounded** | `YYYY-MM-DD-<feature>` from the plan filename | Per the qskill-writing-plans / qskill-executing-plans rules: the plan document first, then task by task. The `Plan:` trailer points at the plan file. |
 | **Architectural** | `YYYY-MM-DD-<topic>` from the spec filename | The spec document, immediately after writing it (see After the Design). |
 
 Spike (chore slug, no document):
@@ -90,9 +92,9 @@ git commit -m "[chore-2026-09-03] Keep the token-expiry probe script
 Throwaway spike kept at the user's request; no spec or plan document."
 ```
 
-Bounded: không commit tay ở đây — skill `qskill-writing-plans` commit
-plan document và `qskill-executing-plans` commit từng task, cùng slug lấy
-từ tên file plan.
+Bounded: nothing is committed by hand here — `qskill-writing-plans`
+commits the plan document and `qskill-executing-plans` commits each
+task, both using the slug taken from the plan filename.
 
 **Before reporting done on any path**, run `git status --porcelain`. Anything
 still listed is unfinished work: commit it, or say explicitly what you left
@@ -101,28 +103,31 @@ uncommitted and why. Full rules:
 
 ## Bounded Goes To writing-plans
 
-Bounded không viết spec, nhưng vẫn phải để lại tài liệu — và tài liệu đó
-là **plan**, không phải một loại file riêng.
+Bounded writes no spec, but it still leaves a document behind — and that
+document is a **plan**, not a file format of its own.
 
-Lý do: một task bounded vẫn có thể kéo dài nhiều session. Session sau mở
-lên, user chạy `qskill-executing-plans` để làm tiếp; skill đó chỉ đọc
-plan document ở `docs/superpowers/plans/`. Nếu thiết kế nằm trong một
-file spec hay brief riêng thì không có gì để execute — nên bounded và
-architectural cùng đổ về một dạng tài liệu duy nhất.
+Why: a bounded task can still stretch across several sessions. In a
+later session your human partner runs `qskill-executing-plans` to carry
+on, and that skill reads only plan documents under
+`docs/superpowers/plans/`. A design parked in a spec or a bespoke brief
+file leaves nothing to execute — so bounded and architectural funnel
+into the same single document type.
 
-**Khi hết câu hỏi:** nói ngắn gọn rằng bạn chuyển sang viết plan, rồi
-invoke skill `qskill-writing-plans`. Kể từ đó, mọi thứ — nội dung plan,
-đường dẫn file, slug, commit, gate user review, bàn giao sang
-`qskill-executing-plans` — theo đúng luật của skill đó. Đừng lặp lại hay
-tự chế biến những luật đó ở đây.
+**When no questions are left:** say briefly that you are moving on to
+write the plan, then invoke the `qskill-writing-plans` skill. From that
+point everything — plan content, file path, slug, commits, the user
+review gate, the handoff to `qskill-executing-plans` — follows that
+skill's rules. Do not restate or reinvent those rules here.
 
-**Khác biệt duy nhất so với architectural:** bounded không có spec
-document, nên trong plan header, trường `Spec:` ghi `không có (bounded
-task)` kèm một hai câu tóm tắt yêu cầu và lý do chọn cách làm này — đó là
-mốc để sau này đọc lại và biết vì sao thay đổi được làm như vậy.
+**The one difference from architectural:** a bounded task has no spec
+document, so in the plan header the `Spec:` field reads `none (bounded
+task)` followed by a sentence or two summarizing the request and why
+this approach was chosen — that is the record someone reads later to
+learn why the change was made this way.
 
-**Gate duyệt không đổi:** bạn không code trong lượt trình bày. Plan được
-viết, được commit, user review plan, rồi mới implement.
+**The approval gate is unchanged:** you do not write code in the turn
+where you hand over. The plan gets written, committed, reviewed by your
+human partner, and only then implemented.
 
 ## Anti-Pattern: "Too Simple To Need Approval"
 
@@ -139,17 +144,17 @@ artifact, never the approval.
 |---------|---------|
 | "This is too simple to need a design" | Simple means a short design, not no design. Một plan ngắn, rồi chờ duyệt. |
 | "I'll call it bounded and skip the spec" | Reaching for a label to skip work IS the doubt — take the heavier path. |
-| "Bounded nên khỏi ghi gì lại" | Bounded vẫn ra một plan qua qskill-writing-plans. Session sau còn có cái để execute. |
-| "Thiết kế ngắn nằm trong chat rồi, khỏi viết plan" | Chat không tra cứu được sau ba tháng, và executing-plans không đọc được chat. |
-| "Trình bày lại cả thiết kế trong chat cho chắc" | Chat chỉ để hỏi những gì user phải quyết. Thiết kế nằm trong plan. |
-| "Bounded nhỏ nên tôi tự ghi file thiết kế riêng cho gọn" | Một dạng tài liệu duy nhất: plan. File riêng là file không skill nào chạy được. |
-| "Nó chỉ là bug nhỏ, tôi đoán được chỗ sai" | Bug đi qua qskill-systematic-debugging trước. Đoán không phải root cause. |
+| "Bounded means nothing gets written down" | Bounded still produces a plan via qskill-writing-plans. A later session needs something to execute. |
+| "The short design is in the chat, no need for a plan" | Chat is not searchable three months later, and executing-plans cannot read chat. |
+| "I'll restate the whole design in chat to be safe" | Chat is only for what your partner must decide. The design lives in the plan. |
+| "It's a small bounded task, I'll just write my own design file" | One document type: the plan. A bespoke file is a file no skill can run. |
+| "It's only a small bug, I can guess where it broke" | Bugs go through qskill-systematic-debugging first. A guess is not a root cause. |
 | "It's bounded and the design is obvious — I'll start while they read it" | The gate is the approval, not the design's length. Present, then stop until you hear yes. |
 | "I understand this kind of app, so it's bounded" | Bounded measures the repo, not your familiarity. A new project has no existing flow — it is architectural. |
 | "The spike works, so I'll keep the code" | A spike's output is an answer. Keeping the code is a new request — classify it. |
 | "It grew, but I'm almost done — no need to re-classify" | Hidden complexity upgrades the path mid-task. Stop and say so. |
 | "They approved the spike, so the follow-up change is approved too" | Each task gets its own classification and its own approval. |
-| "Không có spec nên không có slug để commit" | Spike dùng `chore-YYYY-MM-DD`; bounded dùng slug lấy từ tên file plan. Không có document không bao giờ nghĩa là không commit. |
+| "No spec, so there is no slug to commit with" | Spike uses `chore-YYYY-MM-DD`; bounded uses the slug from the plan filename. No document never means no commit. |
 | "It's a bounded one-file fix — the user can commit it" | The path that writes the file commits the file. Leaving it dirty is what makes later history unreadable. |
 | "The spike code is throwaway, so I'll just leave it lying around" | Throwaway means deleted. Anything still on disk gets committed. |
 
@@ -167,16 +172,16 @@ your path and complete them in order.
 6. **Report findings** — a recommendation; label anything built as throwaway
 
 **Bug:**
-1. **Invoke `qskill-systematic-debugging`** — trước mọi thứ khác; không đoán, không vá triệu chứng
-2. **Report root cause** — nói rõ nguyên nhân thật và bằng chứng
-3. **Re-classify the fix** — bounded hay architectural, rồi chạy đúng checklist của path đó (kể cả gate duyệt và tài liệu plan)
+1. **Invoke `qskill-systematic-debugging`** — before anything else; no guessing, no patching the symptom
+2. **Report root cause** — state the real cause and the evidence for it
+3. **Re-classify the fix** — bounded or architectural, then run that path's checklist in full (approval gate and plan document included)
 
 **Bounded:**
 1. **Explore project context** — check files, docs, recent commits
 2. **Ask clarifying questions** — one at a time, the ones that matter
-3. **Chỉ nêu trong chat những điểm cần user quyết** — câu hỏi mở, lựa chọn phương án, đánh đổi; không trình bày lại toàn bộ thiết kế
-4. **Invoke qskill-writing-plans** — khi hết câu hỏi; plan ngắn, `Spec:` ghi `không có (bounded task)` kèm tóm tắt yêu cầu và lý do chọn cách làm
-5. **Từ đây theo luật của skill đó** — nó lo file plan, slug, commit, gate user review plan, rồi bàn giao sang qskill-executing-plans
+3. **Raise in chat only what your partner must decide** — open questions, choices between approaches, trade-offs; do not restate the whole design
+4. **Invoke qskill-writing-plans** — once no questions are left; a short plan, with `Spec:` reading `none (bounded task)` plus a summary of the request and why this approach was chosen
+5. **Follow that skill's rules from there** — it owns the plan file, slug, commits, the user review gate, and the handoff to qskill-executing-plans
 
 **Architectural:**
 1. **Explore project context** — check files, docs, recent commits
@@ -197,7 +202,7 @@ digraph brainstorming {
     "Report root cause; re-classify the fix" [shape=box];
     "Present question + probe (2-3 sentences)" [shape=box];
     "Ask clarifying questions (bounded)" [shape=box];
-    "Nêu điểm cần user quyết" [shape=box];
+    "Raise only what the user must decide" [shape=box];
     "Invoke writing-plans skill (bounded)" [shape=doublecircle];
     "Human approves probe?" [shape=diamond];
     "Investigate; report recommendation" [shape=doublecircle];
@@ -219,8 +224,8 @@ digraph brainstorming {
     "Invoke qskill-systematic-debugging" -> "Report root cause; re-classify the fix";
     "Report root cause; re-classify the fix" -> "Classify: spike / bug / bounded / architectural";
     "Present question + probe (2-3 sentences)" -> "Human approves probe?";
-    "Ask clarifying questions (bounded)" -> "Nêu điểm cần user quyết";
-    "Nêu điểm cần user quyết" -> "Invoke writing-plans skill (bounded)" [label="hết câu hỏi"];
+    "Ask clarifying questions (bounded)" -> "Raise only what the user must decide";
+    "Raise only what the user must decide" -> "Invoke writing-plans skill (bounded)" [label="no questions left"];
     "Human approves probe?" -> "Investigate; report recommendation" [label="yes"];
     "Hidden complexity? Upgrade path" -> "Classify: spike / bug / bounded / architectural";
     "Explore project context" -> "Ask clarifying questions";
@@ -238,8 +243,8 @@ digraph brainstorming {
 
 **Terminal states are path-bound.** Architectural: the ONLY skill you
 invoke after brainstorming is qskill-writing-plans — never any other
-implementation skill. Bounded: cũng kết thúc ở qskill-writing-plans —
-chỉ khác là không có spec document đi trước. Spike: the terminal
+implementation skill. Bounded: also ends at qskill-writing-plans — the
+only difference is that no spec document precedes it. Spike: the terminal
 state is a reported recommendation. Bug: the terminal state is a root
 cause plus a re-classification — the fix runs on its own path.
 
