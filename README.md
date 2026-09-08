@@ -11,7 +11,7 @@ npx q-skill
 Lệnh sẽ hỏi lần lượt:
 
 1. **Chọn agent tool** muốn cài skill (có thể chọn nhiều tool cùng lúc) — mặc định **tick sẵn tất cả tool**, cứ Enter là cài cho toàn bộ, muốn thu hẹp thì bỏ tick bớt.
-2. **Chọn phạm vi cài đặt**: mặc định **Project (thư mục hiện tại)**, hoặc đổi sang Global (home directory).
+2. **Chọn phạm vi cài đặt**: mặc định **Global (home directory)**, hoặc đổi sang Project (thư mục hiện tại).
 
 Sau đó toàn bộ skill sẽ được copy vào đúng thư mục đích, ghi đè nếu skill đã tồn tại.
 
