@@ -295,11 +295,43 @@ identical on every commit.
 Commit the plan document as soon as it is written — do not leave it uncommitted
 while implementation starts. Full rules: [commit-convention](../qskill-executing-plans/references/commit-convention.md).
 
+## Plan Review Gate
+
+**The plan is not a green light. Writing it and executing it are two turns,
+separated by your human partner's approval.**
+
+After the plan is saved and committed, STOP. Report the path and ask for a
+review — do not create execution todos, do not open an implementation file,
+do not invoke qskill-executing-plans in the same turn:
+
+**"Plan complete and saved to `docs/superpowers/plans/<filename>.md` (committed as `[<plan-slug>]`). Please review it and tell me if you want changes before I start implementing."**
+
+Then wait. If your partner asks for changes, make them, re-commit the plan, and
+ask again. Only an explicit yes opens the gate.
+
+The gate is skipped **only** when your human partner said so themselves in this
+session ("write the plan and just do it", "khỏi review, làm luôn"). Their silence
+is not that instruction, and neither is an approval they gave earlier to
+something else — the brainstorming design, the classification, a previous plan.
+
 ## Execution Handoff
 
-After saving the plan, hand off directly — do not ask the user to choose an execution approach:
+Once your partner approves the plan:
 
-**"Plan complete and saved to `docs/superpowers/plans/<filename>.md`. Continuing with qskill-executing-plans."**
+**"Plan approved. Continuing with qskill-executing-plans."**
 
 - **REQUIRED SKILL:** Use qskill-executing-plans.
+- Do not ask the user to choose an execution approach — that decision is not
+  theirs to make here. This is about *how* to execute (inline, worktree,
+  subagents), never about *whether* the plan was approved.
 - qskill-executing-plans works inline on the current branch by default — no worktree, no new branch. If the current branch is `main`/`master` or otherwise unsuitable, it stops and asks the user before creating one; no extra confirmation is needed here.
+
+## Red Flags
+
+| Thought | Reality |
+|---------|---------|
+| "They approved the design, so the plan is approved" | The design and the plan are two documents. Each gets its own yes. |
+| "The plan just restates what we agreed — no need to review it" | The plan is where the agreement turns into file paths and task order. That is exactly what gets reviewed. |
+| "I'll start task 1 while they read the plan" | Starting is the thing the gate blocks. Stop after the plan and wait. |
+| "They said 'go ahead' at the start, that covers execution" | It covers writing the plan. Execution needs a yes on the written plan. |
+| "They didn't reply, so it must be fine" | Silence is not approval. Ask again if you need to. |
