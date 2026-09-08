@@ -164,6 +164,22 @@ Do not start `review`, `feedback`, or `scan` until the Approved Plan file is con
 
 ---
 
+## Scan Target Resolution
+
+Applies to `scan` mode only, when the user runs `scan` without giving any input — no source path, no Approved Plan, no Specification, no feature/topic name.
+
+1. Read today's Git log on the current branch — e.g. `git log --since=midnight --until=now --stat`.
+2. If today has no commit, say so and ask the user for the scan target. Do not fall back to another day on your own.
+3. If today has exactly one commit, that commit is the scan target — the source files it touched are the scope.
+4. If today has several commits, list them all (short hash, subject, changed files), mark the most recent one, and ask the user to pick one. Never guess which one.
+5. Infer the main goal of the chosen commit yourself, from its message and its diff, and state it in one sentence. Ask the user to confirm or correct that sentence — do not ask them to write the goal from scratch.
+6. If an Approved Plan matching that goal exists, resolve it with Plan Resolution and use it. If none exists, the confirmed goal replaces the Approved Plan as the review baseline, and the scan summary must say so.
+7. Wait for the confirmation, then run the Scan Workflow on those files using the confirmed goal as the review baseline.
+
+Do not start `scan` until both the target commit and the goal are confirmed by the user.
+
+---
+
 # Review Report Location
 
 The review report path is fixed. Never choose another location or name.
@@ -347,6 +363,7 @@ Otherwise
 
 # Scan Workflow
 
+0. If the user gave no input, resolve the target first — see Scan Target Resolution.
 1. Load the Approved Plan.
 2. Load the Source Code.
 3. Analyze the implementation with the same depth and evidence rules as `review` — do not hold back because the report will not be written yet.

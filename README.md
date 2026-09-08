@@ -217,6 +217,18 @@ Nếu không phải path có sẵn, agent tự tìm theo thứ tự:
 4. Ra nhiều kết quả gây nhầm lẫn → liệt kê để bạn chọn, agent không tự đoán.
 5. Không ra kết quả nào → hỏi bạn xác nhận topic hoặc đưa path chính xác.
 
+### Chạy `scan` mà không nhập gì
+
+Riêng role `scan`, nếu bạn gọi mà không đưa path / Spec / tên tính năng nào, agent sẽ tự lấy mốc từ **git log trong ngày hôm đó** (branch hiện tại):
+
+1. Không có commit nào trong ngày → agent hỏi lại bạn, **không tự lùi sang ngày khác**.
+2. Đúng 1 commit → lấy luôn commit đó làm phạm vi scan (với `review-plan` là file Plan/Spec mà commit chạm vào).
+3. Nhiều commit → agent liệt kê đầy đủ (hash, subject, file thay đổi), **đánh dấu commit mới nhất**, để bạn chọn — không tự đoán.
+4. Agent **tự suy ra mục tiêu chính** của commit đã chọn (từ commit message + diff), phát biểu thành 1 câu và xin bạn confirm hoặc sửa lại — bạn không phải tự viết từ đầu.
+5. Với `review-code`, nếu không có Approved Plan khớp mục tiêu đó thì chính mục tiêu đã confirm sẽ đóng vai baseline để review, và agent phải ghi rõ điều này trong phần tóm tắt.
+
+Agent chỉ bắt đầu `scan` sau khi bạn đã confirm cả commit lẫn mục tiêu.
+
 ### Ví dụ gọi skill
 
 ```

@@ -163,6 +163,22 @@ Do not start `review`, `feedback`, or `scan` until the Plan file is confirmed.
 
 ---
 
+## Scan Target Resolution
+
+Applies to `scan` mode only, when the user runs `scan` without giving any input — no path, no Specification, no feature/topic name.
+
+1. Read today's Git log on the current branch — e.g. `git log --since=midnight --until=now --name-only`.
+2. Collect the files those commits touched under `docs/superpowers/plans/` and `docs/superpowers/specs/`.
+3. If today has no commit, or the commits touched no Plan/Spec file, list today's commits (short hash, subject, most recent one marked) and ask the user for the Plan path or topic. Do not fall back to another day on your own.
+4. If exactly one Plan/Spec file was touched, propose it as the scan target.
+5. If several commits touched Plan/Spec files, list those commits (short hash, subject, Plan/Spec files touched), mark the most recent one, and ask the user to pick one. Never guess.
+6. Infer the main goal of the chosen commit yourself, from its message and its diff, and state it in one sentence. Ask the user to confirm or correct that sentence — do not ask them to write the goal from scratch.
+7. Wait for the confirmation, then run the Scan Workflow using the confirmed Plan and the confirmed goal as the review baseline.
+
+Do not start `scan` until both the Plan file and the goal are confirmed by the user.
+
+---
+
 # Review Report Location
 
 The review report path is fixed. Never choose another location or name.
@@ -357,6 +373,7 @@ Otherwise
 
 # Scan Workflow
 
+0. If the user gave no input, resolve the target first — see Scan Target Resolution.
 1. Load the Plan.
 2. Analyze the Plan with the same depth and evidence rules as `review` — do not hold back because the report will not be written yet.
 3. Classify every finding using the Severity Scale. Do not create Issue IDs and do not write the review report at this stage.
