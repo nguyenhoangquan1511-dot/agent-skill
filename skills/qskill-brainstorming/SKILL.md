@@ -52,13 +52,13 @@ override it:
   that matter; in chat raise ONLY what your human partner has to decide
   (open questions, choices, trade-offs) — do not restate the whole
   design there. Once no questions are left, do NOT write a spec: invoke
-  the `qskill-writing-plans` skill to write a short plan, and let that
+  the `qskill-write-ba-plan` skill to write a short plan, and let that
   skill handle the file, the commit and the review gate (see "Bounded
-  Goes To writing-plans").
+  Goes To write-ba-plan").
 - **Architectural** — new projects, new subsystems, changes that
   restructure how components fit together or alter interfaces others
   depend on. Follow the full process: questions, approaches, sectioned
-  design, written spec, then the writing-plans skill. Everything about
+  design, written spec, then the write-ba-plan skill. Everything about
   approaches, design presentation and the spec document itself lives in
   [writing-specs](references/writing-specs.md) — read it before
   exploring approaches.
@@ -88,7 +88,7 @@ commit format, belong to the path:
 | Path | Document the slug comes from | Rules live in |
 |---|---|---|
 | **Spike** | the research doc | [writing-research](references/writing-research.md) |
-| **Bounded** | the plan | `qskill-writing-plans` / `qskill-executing-plans` |
+| **Bounded** | the plan | `qskill-write-ba-plan` / `qskill-executing-plans` |
 | **Architectural** | the spec, then the plan | [writing-specs](references/writing-specs.md) |
 | **Bug** | none of its own — it ends at a root cause | the path the fix is re-classified into |
 
@@ -97,7 +97,7 @@ still listed is unfinished work: commit it, or say explicitly what you left
 uncommitted and why. Full rules:
 [commit-convention](../qskill-executing-plans/references/commit-convention.md).
 
-## Bounded Goes To writing-plans
+## Bounded Goes To write-ba-plan
 
 Bounded writes no spec, but it still leaves a document behind — and that
 document is a **plan**, not a file format of its own.
@@ -110,7 +110,7 @@ file leaves nothing to execute — so bounded and architectural funnel
 into the same single document type.
 
 **When no questions are left:** say briefly that you are moving on to
-write the plan, then invoke the `qskill-writing-plans` skill. From that
+write the plan, then invoke the `qskill-write-ba-plan` skill. From that
 point everything — plan content, file path, slug, commits, the user
 review gate, the handoff to `qskill-executing-plans` — follows that
 skill's rules. Do not restate or reinvent those rules here.
@@ -140,7 +140,7 @@ artifact, never the approval.
 |---------|---------|
 | "This is too simple to need a design" | Simple means a short design, not no design. Write the short plan, then wait for approval. |
 | "I'll call it bounded and skip the spec" | Reaching for a label to skip work IS the doubt — take the heavier path. |
-| "Bounded means nothing gets written down" | Bounded still produces a plan via qskill-writing-plans. A later session needs something to execute. |
+| "Bounded means nothing gets written down" | Bounded still produces a plan via qskill-write-ba-plan. A later session needs something to execute. |
 | "The short design is in the chat, no need for a plan" | Chat is not searchable three months later, and executing-plans cannot read chat. |
 | "I'll restate the whole design in chat to be safe" | Chat is only for what your partner must decide. The design lives in the plan. |
 | "It's a small bounded task, I'll just write my own design file" | One document type: the plan. A bespoke file is a file no skill can run. |
@@ -179,7 +179,7 @@ your path and complete them in order.
 1. **Explore project context** — check files, docs, recent commits
 2. **Ask clarifying questions** — one at a time, the ones that matter
 3. **Raise in chat only what your partner must decide** — open questions, choices between approaches, trade-offs; do not restate the whole design
-4. **Invoke qskill-writing-plans** — once no questions are left; a short plan, with `Spec:` reading `none (bounded task)` plus a summary of the request and why this approach was chosen
+4. **Invoke qskill-write-ba-plan** — once no questions are left; a short plan, with `Spec:` reading `none (bounded task)` plus a summary of the request and why this approach was chosen
 5. **Follow that skill's rules from there** — it owns the plan file, slug, commits, the user review gate, and the handoff to qskill-executing-plans
 
 **Architectural:**
@@ -191,7 +191,7 @@ your path and complete them in order.
 6. **Write design doc** — per [writing-specs](references/writing-specs.md): write it, then commit it
 7. **Spec self-review** — per the same reference; fix inline
 8. **User reviews written spec** — ask user to review the spec file before proceeding
-9. **Transition to implementation** — invoke writing-plans skill to create implementation plan
+9. **Transition to implementation** — invoke write-ba-plan skill to create implementation plan
 
 ## Process Flow
 
@@ -203,7 +203,7 @@ digraph brainstorming {
     "Present question + probe (2-3 sentences)" [shape=box];
     "Ask clarifying questions (bounded)" [shape=box];
     "Raise only what the user must decide" [shape=box];
-    "Invoke writing-plans skill (bounded)" [shape=doublecircle];
+    "Invoke write-ba-plan skill (bounded)" [shape=doublecircle];
     "Human approves probe?" [shape=diamond];
     "Investigate" [shape=box];
     "Write research doc + commit" [shape=box];
@@ -216,7 +216,7 @@ digraph brainstorming {
     "Write design doc" [shape=box];
     "Spec self-review\n(fix inline)" [shape=box];
     "User reviews spec?" [shape=diamond];
-    "Invoke writing-plans skill" [shape=doublecircle];
+    "Invoke write-ba-plan skill" [shape=doublecircle];
     "Hidden complexity? Upgrade path" [shape=box];
 
     "Classify: spike / bug / bounded / architectural" -> "Present question + probe (2-3 sentences)" [label="spike"];
@@ -227,7 +227,7 @@ digraph brainstorming {
     "Report root cause; re-classify the fix" -> "Classify: spike / bug / bounded / architectural";
     "Present question + probe (2-3 sentences)" -> "Human approves probe?";
     "Ask clarifying questions (bounded)" -> "Raise only what the user must decide";
-    "Raise only what the user must decide" -> "Invoke writing-plans skill (bounded)" [label="no questions left"];
+    "Raise only what the user must decide" -> "Invoke write-ba-plan skill (bounded)" [label="no questions left"];
     "Human approves probe?" -> "Investigate" [label="yes"];
     "Investigate" -> "Write research doc + commit";
     "Write research doc + commit" -> "Report recommendation";
@@ -241,13 +241,13 @@ digraph brainstorming {
     "Write design doc" -> "Spec self-review\n(fix inline)";
     "Spec self-review\n(fix inline)" -> "User reviews spec?";
     "User reviews spec?" -> "Write design doc" [label="changes requested"];
-    "User reviews spec?" -> "Invoke writing-plans skill" [label="approved"];
+    "User reviews spec?" -> "Invoke write-ba-plan skill" [label="approved"];
 }
 ```
 
 **Terminal states are path-bound.** Architectural: the ONLY skill you
-invoke after brainstorming is qskill-writing-plans — never any other
-implementation skill. Bounded: also ends at qskill-writing-plans — the
+invoke after brainstorming is qskill-write-ba-plan — never any other
+implementation skill. Bounded: also ends at qskill-write-ba-plan — the
 only difference is that no spec document precedes it. Spike: the terminal
 state is a committed research doc plus a reported recommendation. Bug: the terminal state is a root
 cause plus a re-classification — the fix runs on its own path.
@@ -297,7 +297,7 @@ you classified into:
 - **Architectural** — [writing-specs](references/writing-specs.md):
   exploring approaches, presenting the design, spec content rules, the spec
   document, its commit, self-review and the user review gate.
-- **Bounded** — no reference file here; invoke `qskill-writing-plans` and
+- **Bounded** — no reference file here; invoke `qskill-write-ba-plan` and
   follow that skill.
 - **Bug** — no reference file here; invoke `qskill-systematic-debugging`,
   then re-classify.

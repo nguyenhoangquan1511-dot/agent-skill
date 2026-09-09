@@ -176,5 +176,5 @@ Wait for the user's response. If they request changes, make them and re-run the 
 
 **Implementation:**
 
-- Invoke the qskill-writing-plans skill to create a detailed implementation plan
-- Do NOT invoke any other skill. writing-plans is the next step.
+- Invoke the qskill-write-ba-plan skill to create a detailed implementation plan
+- Do NOT invoke any other skill. write-ba-plan is the next step.

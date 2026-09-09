@@ -1,7 +1,7 @@
 # Commit Convention
 
 > **Reference doc** (not a standalone skill). Canonical commit rules for every
-> qskill skill that creates a Git commit: brainstorming, writing-plans,
+> qskill skill that creates a Git commit: brainstorming, write-ba-plan,
 > executing-plans, review-plan, review-code.
 
 ## Why
@@ -106,7 +106,7 @@ Spec commit (brainstorming):
 Plan: docs/superpowers/specs/2026-09-03-user-auth-design.md
 ```
 
-Plan commit (writing-plans):
+Plan commit (write-ba-plan):
 
 ```
 [2026-09-03-user-auth] Add implementation plan for JWT session handling

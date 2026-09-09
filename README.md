@@ -27,10 +27,11 @@ hoặc dùng `npm link` để link package cục bộ rồi gọi `npx q-skill` 
 
 ## Danh sách skill đi kèm
 
-Chỉ 6 skill sau hiện trong danh sách skill của agent:
+Chỉ 7 skill sau hiện trong danh sách skill của agent:
 
 - `qskill-brainstorming` — làm rõ ý tưởng thành spec
-- `qskill-writing-plans` — viết implementation plan từ spec
+- `qskill-write-ba-plan` — viết implementation plan từ spec, thuần hành vi (BA), không code kể cả code inline. **Đây là skill mặc định các skill khác trỏ tới**
+- `qskill-writing-plans` — bản plan cũ theo hướng skeleton (có signature, cho phép block type/contract); giữ lại cho ai cần
 - `qskill-executing-plans` — thực thi plan (kèm toàn bộ reference doc của pha thực thi)
 - `qskill-review-plan` — review và cải thiện plan/spec
 - `qskill-review-code` — review code so với plan đã duyệt
@@ -124,9 +125,33 @@ Cấm tuyệt đối các placeholder kiểu "TBD", "add validation", "tương t
 
 Sau khi lưu plan, skill **handoff thẳng** qua `qskill-executing-plans` — không hỏi chọn cách thực thi. Mặc định thực thi **inline ngay trên nhánh hiện tại** (không tự tạo worktree/branch mới); nếu đang ở `main`/`master` hoặc nhánh không phù hợp, skill tự dừng lại hỏi bạn trước khi tạo branch/worktree. Chỉ khi bạn chủ động yêu cầu dùng subagent, skill mới rẽ sang chế độ Subagent-Driven (mỗi task 1 subagent riêng, dùng worktree cô lập).
 
+## Cách dùng `qskill-write-ba-plan` (viết plan thuần BA)
+
+Cùng vị trí trong quy trình với `qskill-writing-plans` (input là spec, output là plan tại `docs/superpowers/plans/`), dùng khi bạn muốn plan **đọc được và nghiệm thu được bởi người không lập trình**.
+
+Skill này **đứng độc lập** — không link ngược sang `qskill-writing-plans`, và là skill mà `qskill-brainstorming` / `qskill-executing-plans` / `qskill-review-plan` hiện trỏ tới. Các bước giống hệt (setup, header, chia task bite-sized, no-placeholder, self-review, commit convention, review gate, handoff), chỉ khác **cách viết**: mọi mô tả là logic nghiệp vụ chứ không phải code.
+
+Khác biệt cốt lõi: plan **không chứa code, kể cả code inline**. Cấm cả những thứ mà quy tắc "không dump code" thường bỏ lọt:
+
+| Bị cấm trong mô tả hành vi | Viết lại thành |
+|---|---|
+| `doThing(...)`, `foo.bar(x)` | mô tả việc gì xảy ra |
+| `(curr) => ...` | quy tắc chọn/lọc bằng lời |
+| `x as SomeResponse`, `data?.data` | mô tả dữ liệu nhận được, shape để ở bảng field |
+| `MessageType.Error` | "hiện thông báo lỗi" |
+| hook / state setter / API framework | trạng thái người dùng nhìn thấy sau đó |
+
+Thay cho signature, mỗi unit được mô tả bằng: tên + file, **nhận gì / trả gì / quy tắc gì / bất biến gì** — viết bằng lời. Data shape viết dạng **bảng field** (tên field, ý nghĩa, bắt buộc/không, giá trị hợp lệ), không viết `interface`/`type`.
+
+So với `qskill-writing-plans`: skill đó **bắt buộc** có signature kèm param/return type và cho phép block type/interface; skill này **cấm** cả hai.
+
+Test case là câu văn `tình huống -> kết quả mong đợi`, không phải code test.
+
+**Lý do:** bản BA dài hơn code là chuyện bình thường và đúng — nó mang theo lý do nghiệp vụ và edge case mà code giấu đi. Xoá code mà không viết lại bằng ngôn ngữ BA thì plan tệ hơn, không phải gọn hơn.
+
 ## Quy ước commit chung cho mọi skill
 
-Mọi skill có tạo commit (`brainstorming`, `writing-plans`, `executing-plans`, `review-plan`, `review-code`) đều tuân theo cùng một chuẩn, để `git log --oneline` group được commit theo plan mà **không cần đọc nội dung commit**.
+Mọi skill có tạo commit (`brainstorming`, `write-ba-plan`, `writing-plans`, `executing-plans`, `review-plan`, `review-code`) đều tuân theo cùng một chuẩn, để `git log --oneline` group được commit theo plan mà **không cần đọc nội dung commit**.
 
 **Cổng chặn Git:** trước khi làm bất cứ việc gì sinh ra file, skill chạy `git rev-parse --git-dir`. Nếu thư mục chưa phải Git repo, skill **dừng lại** và yêu cầu bạn khởi tạo Git. Lý do: không có version control thì nhiều plan + nhiều fix dồn chung một working tree, commit sau đó bị bẩn, không tách được theo plan.
 

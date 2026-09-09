@@ -420,7 +420,7 @@ Done!
 
 **Required workflow references:**
 - **[using-git-worktrees](using-git-worktrees.md)** - Ensures isolated workspace (creates one or verifies existing)
-- **qskill-writing-plans** (skill) - Creates the plan this reference executes
+- **qskill-write-ba-plan** (skill) - Creates the plan this reference executes
 - **[requesting-code-review](requesting-code-review.md)** - Code review template for the final whole-branch review
 - **[finishing-a-development-branch](finishing-a-development-branch.md)** - Complete development after all tasks
 

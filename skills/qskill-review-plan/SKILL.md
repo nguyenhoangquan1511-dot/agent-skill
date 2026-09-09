@@ -98,7 +98,7 @@ user.
 A fix must never lower the quality of the Plan.
 
 Every edit written into the Plan during feedback MUST obey the Plan Content
-Rules of the `qskill-writing-plans` skill. Read that section before editing if
+Rules of the `qskill-write-ba-plan` skill. Read that section before editing if
 it is not already in context.
 
 The rules that get broken most often
@@ -106,8 +106,14 @@ The rules that get broken most often
 - Full function bodies, full component files and full test files are forbidden
   in the Plan. Resolving an issue by pasting implementation code is not a fix.
 - Test cases stay a text checklist `case name -> expected`. Never test code.
-- Code is allowed only for contracts (type / interface / schema / enum /
-  config), or for special logic already confirmed in the spec, at most 10 lines.
+- No code at all, and that includes code written inline inside a sentence —
+  call syntax, arrow callbacks, casts, member chains, enum access, framework or
+  state APIs, comparison expressions. A Plan with no code block is still a code
+  Plan when its steps are written as expressions.
+- Signatures with parameter and return types, and type / interface / schema
+  blocks, are forbidden too. A unit is described by name plus what it takes,
+  what it returns and the rules it obeys, in words; an agreed payload is
+  described by a field table.
 - Deleting a code block is only half of the fix. The same logic must be
   rewritten in Business Analyst language — numbered steps in execution order,
   the condition of each branch, the outcome of each branch, and the failure
@@ -146,8 +152,8 @@ A Recommendation must NOT contain
 **Completion Validation** — on top of the common checks, for every RESOLVED
 issue verify
 
-- the Plan change obeys the Plan Content Rules — no full function body, no full
-  component file, no test code
+- the Plan change obeys the Plan Content Rules — no function body, no component
+  file, no test code, no signature, no type block, no inline expression
 - any code block removed from the Plan has been replaced with Business Analyst
   language, not with a vague sentence
 
@@ -155,7 +161,7 @@ issue verify
 
 | Category | What to look for |
 |----------|------------------|
-| Code bloat | Any code block written into the Plan or a Recommendation during this execution. Keep it only if it is a type / interface / schema / config, or confirmed special logic of at most 10 lines. Otherwise replace it with signature plus behaviour description |
+| Code bloat | Any code written into the Plan or a Recommendation during this execution — a block, a signature, a type definition, or an expression inside a sentence. Replace it with the behaviour in domain terms: what happens, on which condition, with which outcome |
 
 Code bloat is always a real problem, never a formatting preference. Fix it.
 
