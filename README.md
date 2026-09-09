@@ -185,7 +185,7 @@ Cả hai đều duy trì **1 file report duy nhất** cho mỗi artifact tại `
 | Role | Làm gì | Có sửa Plan/Code không? | Có ghi report không? |
 |---|---|---|---|
 | **review** | Phân tích toàn diện, phát hiện issue mới, đối chiếu lại issue cũ | Không | Có — ghi/cập nhật report |
-| **feedback** | Xử lý từng issue đang `OPEN` trong report: sửa cho tới khi `RESOLVED`, hoặc chuyển `DISCUSS` nếu cần người quyết định | Có | Có — đồng bộ report theo từng thay đổi |
+| **feedback** | Kiểm chứng từng issue đang `OPEN` trước khi làm theo: issue đúng thì sửa tới `RESOLVED`; issue sai thì phản biện, để nguyên artifact và đánh `INVALID` kèm bằng chứng; cần người quyết định thì `DISCUSS` | Có (trừ issue `INVALID` / `DISCUSS`) | Có — đồng bộ report theo từng thay đổi |
 | **scan** | Phân tích đầy đủ như `review`, nhưng **chưa ghi report ngay** — tóm tắt số lượng issue theo mức độ rồi hỏi bạn muốn ghi report hay fix luôn | Chỉ khi bạn chọn "fix luôn" | Chỉ khi bạn chọn "ghi report"; nếu chọn "fix luôn" thì không bắt buộc |
 
 **Khi nào dùng `scan`**: đây là role trung gian, dùng khi bạn chưa biết Plan/Code còn nhiều lỗi hay không và muốn quyết định hướng xử lý trước khi tốn 1 vòng review + feedback riêng biệt. Chạy `scan`, agent sẽ:

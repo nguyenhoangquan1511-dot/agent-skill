@@ -12,7 +12,7 @@ only what is genuinely specific to it.
 **Language:** Write the review report in Vietnamese — Problem, Recommendation,
 Response and every explanatory passage. Talk to the user in Vietnamese. Keep
 code, identifiers, file paths, commands, type names, Issue IDs and Status
-values (OPEN / RESOLVED / DISCUSS) in their original form.
+values (OPEN / RESOLVED / DISCUSS / INVALID) in their original form.
 
 ---
 
@@ -46,11 +46,17 @@ Review MUST NEVER modify TARGET.
 
 ## feedback
 
-- Resolve review issues by updating TARGET.
+- Verify every review issue before acting on it.
+- Resolve the issues that hold by updating TARGET.
+- Reject the issues that do not hold, with evidence — see INVALID.
 - Synchronize the review report with every change to TARGET.
 - Keep TARGET and the review report consistent at all times.
 
-Feedback MUST update BOTH TARGET and the review report.
+Feedback is a judgement step, not a transcription step. An issue is an argument
+about TARGET, and feedback checks that argument before obeying it.
+
+Feedback MUST update BOTH TARGET and the review report — except for an issue
+rejected as INVALID, which updates the review report only.
 
 ## scan
 
@@ -230,9 +236,14 @@ All other fields are immutable.
 ```
 OPEN -> RESOLVED     (feedback resolved it; TARGET has been updated)
 OPEN -> DISCUSS      (human decision required)
+OPEN -> INVALID      (verification disproved the issue; TARGET unchanged)
 ```
 
 No other transitions are allowed.
+
+An INVALID issue stays in the report like any other — never deleted, never
+renumbered. The report records that the issue was raised and why it was
+rejected.
 
 # Status
 
@@ -241,6 +252,10 @@ No other transitions are allowed.
 **RESOLVED** — the issue has been accepted and TARGET has already been updated.
 
 **DISCUSS** — a human decision is required.
+
+**INVALID** — verification showed the issue does not hold against the current
+TARGET and BASELINE. TARGET is left unchanged, and Response carries the evidence
+that disproves the Problem.
 
 ---
 
@@ -254,8 +269,13 @@ No other transitions are allowed.
 6. Reuse existing Issue IDs.
 7. Mark fixed issues as RESOLVED.
 8. Keep unresolved issues OPEN.
-9. Create Issue IDs only for newly discovered problems.
-10. Update the review report.
+9. Leave INVALID issues as they are. A rejected issue is only reopened when the
+   user asks for it, or when new evidence contradicts the rejection recorded in
+   its Response — in which case reuse the same Issue ID and set it back to OPEN,
+   stating in Response what changed. Never re-raise the same finding under a new
+   Issue ID.
+10. Create Issue IDs only for newly discovered problems.
+11. Update the review report.
 
 Review never modifies TARGET.
 
@@ -269,25 +289,50 @@ Review never modifies TARGET.
 4. Process every OPEN issue.
 5. Never skip an OPEN issue.
 
-For each OPEN issue
+For each OPEN issue, verify first, then act.
 
-If the issue can be safely resolved
+## Step 1 — Verify the issue
+
+Never edit TARGET straight from a Recommendation. Check three things against the
+current content of TARGET and BASELINE:
+
+1. **The Problem still exists** in TARGET, at the stated Location.
+2. **The Problem really is a problem** — it breaks BASELINE, correctness, or a
+   documented project convention. Not a preference, not an invented requirement.
+3. **The Recommendation actually fixes it**, and does not itself contradict
+   BASELINE, break another part of TARGET, or violate a rule of this skill.
+
+A review report is written by a reviewer working from a partial view. It can be
+stale, it can misread TARGET, and its Recommendation can be wrong even when its
+Problem is right. Verification is what separates feedback from transcription.
+
+## Step 2 — Act on what the verification found
+
+**All three hold** — resolve it
 
 - Update TARGET.
 - Update Status to RESOLVED.
-- Update Updated By.
-- Update Updated At.
-- Update Response.
+- Update Updated By, Updated At, Response.
 
-Otherwise
+**Check 1 or 2 failed** — reject it
 
+- Leave TARGET unchanged.
+- Update Status to INVALID.
+- Update Updated By, Updated At.
+- Response records the disproving evidence: what was checked, what TARGET
+  actually contains at that Location, and why the stated Problem does not apply.
+
+**Check 3 failed, or the fix needs a human** — escalate it
+
+- Leave TARGET unchanged.
 - Update Status to DISCUSS.
-- Update Updated By.
-- Update Updated At.
-- Update Response.
+- Update Updated By, Updated At.
+- Response states the disagreement and proposes the alternative fix, so the user
+  decides between two concrete options rather than being asked an open question.
 
-When the execution ends, present every DISCUSS issue in chat — see Presenting
-DISCUSS Issues. Do not end on a bare count.
+When the execution ends, present every DISCUSS issue and every INVALID issue in
+chat — see Presenting DISCUSS Issues and Presenting INVALID Issues. Do not end
+on a bare count.
 
 ---
 
@@ -310,8 +355,8 @@ DISCUSS Issues. Do not end on a bare count.
      re-analyze from scratch.
    - **Fix now** — reuse the analysis just produced and resolve the findings
      directly in TARGET, following the same per-issue resolution as the
-     Feedback Workflow, except creating an Issue ID and writing the review
-     report is optional for this pass. An existing report for this artifact, if
+     Feedback Workflow — including its verification step — except that creating
+     an Issue ID and writing the review report is optional for this pass. An existing report for this artifact, if
      any, may optionally note the fix as a supplement to its latest round.
 6. Continue with whichever path was chosen. Scan itself never modifies TARGET
    or the review report.
@@ -334,6 +379,9 @@ Processing an issue is atomic. These operations must complete together.
 
 Updating only TARGET is invalid. Updating only the review report is invalid.
 
+An issue ending in INVALID or DISCUSS is the one case where the review report
+changes alone — because TARGET was deliberately left untouched.
+
 ---
 
 # Synchronization Invariant
@@ -344,6 +392,10 @@ Whenever TARGET changes, the corresponding review issue must also be updated.
 
 Whenever an issue becomes RESOLVED, the required change in TARGET must already
 exist.
+
+An INVALID issue satisfies this invariant precisely because TARGET was not
+changed: the report states the issue does not apply, and TARGET shows no trace
+of it.
 
 The task is incomplete if TARGET and the review report are inconsistent.
 
@@ -358,6 +410,7 @@ Every OPEN issue encountered during feedback must end in exactly one state.
 
 - RESOLVED
 - DISCUSS
+- INVALID
 
 Leaving an OPEN issue unchanged after processing is not allowed.
 
@@ -377,6 +430,21 @@ Leaving an OPEN issue unchanged after processing is not allowed.
 - insufficient evidence exists
 - human approval is required
 - the skill's own rules forbid the only edit that would resolve it
+- the Problem is real but the Recommendation is wrong — record the alternative
+  fix in Response
+
+**INVALID** — use when
+
+- the Problem cannot be found in the current TARGET at the stated Location
+- the Problem rests on a misreading of TARGET or of BASELINE
+- the behavior it reports is in fact correct under BASELINE
+- the issue was already resolved by an unrelated change, and no trace of it
+  remains
+
+INVALID requires TARGET to stay unchanged and Response to carry the disproving
+evidence. Never mark an issue INVALID because the fix is large, expensive, or
+inconvenient — that is DISCUSS. Never mark it INVALID merely because you would
+have written the code differently.
 
 ---
 
@@ -395,6 +463,13 @@ For every RESOLVED issue
 For every DISCUSS issue
 
 - Response exists
+
+For every INVALID issue
+
+- TARGET was not changed on account of that issue
+- Response contains concrete evidence disproving the Problem, not an opinion
+- Updated By exists
+- Updated At exists
 
 The review report matches the current state of TARGET.
 
@@ -444,6 +519,9 @@ Invalid examples
 - Updating TARGET but not updating Response.
 - Creating a new Issue ID for an existing issue.
 - Ignoring an OPEN issue.
+- Editing TARGET straight from a Recommendation without verifying the Problem.
+- Marking an issue INVALID without evidence, or to avoid an expensive fix.
+- Marking an issue INVALID and changing TARGET for it anyway.
 - Recreating the review report.
 - Removing resolved issues.
 - Doing work that BASELINE does not call for.
@@ -462,15 +540,21 @@ Never
 - rename the review report or derive its name from the current date
 - use `.` or `_` as a separator in the report file name
 - create a second report for an artifact that already has one
+- re-raise an INVALID issue under a new Issue ID
 - commit before the Report Self-Review has run
 - renumber Issue IDs
 - delete issues
 - modify immutable fields
+- resolve an issue without first verifying that its Problem still holds
+- apply a Recommendation known to contradict BASELINE instead of raising DISCUSS
+- mark INVALID without recording the disproving evidence in Response
+- mark INVALID to avoid a fix that is merely large or inconvenient
 - mark RESOLVED without updating TARGET
 - update TARGET without updating the review report (except the `scan` "fix now"
   path — see Scan Workflow)
-- end an execution by reporting only the number of DISCUSS issues — every one of
-  them is presented in the same message (see Presenting DISCUSS Issues)
+- end an execution by reporting only the number of DISCUSS or INVALID issues —
+  every one of them is presented in the same message (see Presenting DISCUSS
+  Issues and Presenting INVALID Issues)
 - make the user ask a second time before you describe an issue they have to
   decide on
 
@@ -487,6 +571,7 @@ yourself. This is an inline checklist — not a subagent dispatch.
 | Consistency | Two issues contradicting each other; Status not matching what the artifact actually contains |
 | Clarity | A Problem or Recommendation ambiguous enough that the reader would fix the wrong thing |
 | Traceability | Every Location still points at something that exists in the current artifact |
+| Verification | Every RESOLVED issue has a matching change in the artifact; every INVALID issue has disproving evidence in Response and no change in the artifact |
 | Scope | Issues that belong to a different artifact, or invented requirements with no evidence |
 
 The skill may add rows to this table; run those too.
@@ -509,7 +594,8 @@ commit.
 The task completes only when
 
 - every required issue has been processed
-- every DISCUSS issue has been presented in chat, not just counted
+- every DISCUSS issue and every INVALID issue has been presented in chat, not
+  just counted
 - TARGET and the review report are synchronized
 - TARGET conforms to BASELINE
 - all validation rules pass
@@ -555,6 +641,33 @@ request.
 
 ---
 
+# Presenting INVALID Issues
+
+Applies to `feedback`, and to the `scan` "fix now" path. An issue rejected as
+INVALID is a disagreement with the review report, so the user hears about it in
+the same message that reports completion — never buried in the report alone.
+
+For each INVALID issue, in 2-4 lines:
+
+1. **Issue ID + Severity + Location** — one line.
+2. **What the report claimed** — the Problem, in one clause.
+3. **What was actually found** — the concrete evidence: what TARGET contains at
+   that Location, or which part of BASELINE makes the reported behavior correct.
+4. **Consequence** — one line: TARGET was left unchanged.
+
+Keep it factual. State what was checked and what it showed; do not argue about
+the reviewer.
+
+If the user disagrees with a rejection, the issue goes back to OPEN in the next
+`review` execution — say so in one line when there is at least one INVALID
+issue, so the user knows the decision is reversible.
+
+**When there are many INVALID issues**, present in full those at High or above,
+capped at five, and summarize the rest one line each (Issue ID, Location,
+one-clause reason).
+
+---
+
 # Chat Output
 
 Report the outcome in the shape below; the skill fills in its own artifact
@@ -584,11 +697,15 @@ RESOLVED: <n> issues (Issue ID list)
 Needs your decision (DISCUSS): <m> issues
 <for each: the presentation described in Presenting DISCUSS Issues>
 
+Rejected as INVALID: <k> issues
+<for each: the presentation described in Presenting INVALID Issues>
+
 <one line: full entries are in the report; happy to go deeper on any of them>
 ```
 
 If `<m>` is 0, drop the DISCUSS block entirely. If it is not 0, the block is
-mandatory in this same message.
+mandatory in this same message. The same rule applies to `<k>` and the INVALID
+block.
 
 **scan**
 
