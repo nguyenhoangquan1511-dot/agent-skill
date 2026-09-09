@@ -5,8 +5,8 @@ description: Use when you have a spec or requirements for a multi-step task, bef
 
 # Writing Plans
 
-**Ngôn ngữ:** Viết tài liệu plan bằng tiếng Việt — tiêu đề, diễn giải, business rule, edge case, tên test case.
-**Ngôn ngữ:** Trao đổi với user bằng tiếng Việt. Giữ nguyên code, identifier, đường dẫn file, câu lệnh và tên type ở dạng gốc.
+**Language:** Write plan documents in Vietnamese — headings, prose, business rules, edge cases, test case names.
+**Language:** Talk to the user in Vietnamese. Keep code, identifiers, file paths, commands and type names in their original form.
 
 ## Overview
 
@@ -310,7 +310,7 @@ Then wait. If your partner asks for changes, make them, re-commit the plan, and
 ask again. Only an explicit yes opens the gate.
 
 The gate is skipped **only** when your human partner said so themselves in this
-session ("write the plan and just do it", "khỏi review, làm luôn"). Their silence
+session ("write the plan and just do it", "skip the review, go ahead"). Their silence
 is not that instruction, and neither is an approval they gave earlier to
 something else — the brainstorming design, the classification, a previous plan.
 

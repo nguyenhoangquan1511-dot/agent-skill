@@ -52,6 +52,19 @@ Các workflow phụ nằm trong `qskill-executing-plans/references/`, chỉ đư
 | `finishing-a-development-branch.md` | Merge / PR / dọn dẹp branch |
 | `implementer-prompt.md`, `task-reviewer-prompt.md`, `scripts/` | Prompt template và script hỗ trợ subagent |
 
+`qskill-brainstorming/references/` — chỉ đọc theo đúng nhánh đã phân loại:
+
+| File | Nội dung |
+|---|---|
+| `writing-specs.md` | Nhánh architectural: explore approach, present design, luật nội dung spec, ghi + commit spec, self-review, review gate |
+| `writing-research.md` | Nhánh spike: ghi research doc ở `docs/superpowers/research/`, cách đặt tên, nội dung, self-review, commit |
+
+`shared/` — guide dùng chung cho nhiều skill, không phải skill:
+
+| File | Nội dung |
+|---|---|
+| `review-common.md` | Toàn bộ luật chung của `qskill-review-plan` và `qskill-review-code`: 3 mode, Plan Resolution, vị trí/tên report, Issue Structure, Severity Scale, lifecycle, workflow, validation, self-review, Git + commit message. Sửa luật chung chỉ cần sửa file này |
+
 ## Cách dùng `qskill-brainstorming` (viết spec)
 
 Gọi skill này **trước bất kỳ việc tạo mới nào** (feature, component, thay đổi hành vi) — skill tự chặn, không cho code/scaffold trước khi bạn duyệt ý định.
