@@ -5,13 +5,38 @@ description: Review and continuously improve source code implementation against 
 
 # Skill: Review Code
 
-**Read this first:** [review-common](../shared/review-common.md) — it holds
+## Step 0 — MANDATORY, NO EXCEPTIONS
+
+**Before anything else, open and read [review-common](../shared/review-common.md) in full.**
+
+Not after picking a mode. Not "if needed". Not from memory of a previous
+session. Before you resolve the target, before you open the source code, before you
+answer the user, before you write a single line.
+
+Then announce: **"Read review-common. Running `<mode>` mode."** The user must
+see that line; without it, you have not started this skill.
+
+Skipping this step has exactly one outcome, and it has happened: you run the
+wrong mode, because the mode workflows exist only in that file. `scan` in
+particular looks like `review` from here and is not — it stops and asks the
+user before anything is written.
+
+| Excuse | Reality |
+|---|---|
+| "I know this skill already" | The workflows are not in this file. You do not know them from here. |
+| "The mode is obvious from the scope table" | The scope table says what a mode may touch, never how it runs. |
+| "It is a long file, I will read the part I need" | You cannot tell which part you need before reading it. Read it in full. |
+| "I read it earlier in this session" | Then say so in the announcement and continue. Otherwise, read it. |
+
+---
+
+**Read this first — open it before running any mode:** [review-common](../shared/review-common.md) — it holds
 every rule the two review skills share: the three modes, Plan Resolution, the
 review report location and naming, Issue Structure, Severity Scale, the issue
 lifecycle, the workflows, validation, Report Self-Review, Git and Commit
 Message. This file records only what is **specific** to review-code. Where the two
 appear to conflict, the specific rule here wins, and only within what it
-actually covers.
+actually covers. The workflow of each mode lives only in that file: reading this file alone is enough to know what a mode may touch, never enough to run it.
 
 ## Objective
 
@@ -66,6 +91,14 @@ Tests, Infrastructure, Configuration.
 
 Scan only produces a severity summary and a decision question. Modifying
 anything requires continuing into `review` or `feedback`.
+
+**Scan ends with a question, never with a report.** After presenting the
+severity summary, STOP and ask the user to choose exactly one: **write the
+report** (continue into `review`), or **fix now** (resolve the findings
+directly in TARGET). Until that answer arrives: no Issue ID, no report file,
+no edit. Never map `scan` onto `review` on your own — they are different
+modes, and `scan` is the one that asks first. Full steps: Scan Workflow in
+review-common.
 
 ---
 
