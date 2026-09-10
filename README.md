@@ -70,15 +70,29 @@ Các workflow phụ nằm trong `qskill-executing-plans/references/`, chỉ đư
 
 Gọi skill này **trước bất kỳ việc tạo mới nào** (feature, component, thay đổi hành vi) — skill tự chặn, không cho code/scaffold trước khi bạn duyệt ý định.
 
-Skill tự phân loại request thành 1 trong 3 nhánh, nói to phân loại đó ra cho bạn override nếu sai:
+Skill tự phân loại request thành 1 trong 4 nhánh và nói to phân loại đó ra:
 
 | Nhánh | Khi nào | Kết quả |
 |---|---|---|
-| **Spike** | Câu hỏi khả thi ("có làm được không") | 2-3 câu hỏi + kế hoạch thử, không tạo file spec, không giữ code |
-| **Bounded** | Sửa nhỏ trên flow **đã có sẵn** trong repo | Agent phải nói rõ "sẽ KHÔNG viết spec/plan", trình bày thiết kế ngắn trong chat, chờ bạn đồng ý **cả việc bỏ spec/plan lẫn thiết kế** rồi mới code |
-| **Architectural** | Project/subsystem mới, thay đổi cách các thành phần ghép với nhau | Hỏi từng câu một → đề xuất 2-3 hướng → trình bày thiết kế theo từng phần, duyệt từng phần → ghi file spec |
+| **Spike** | Câu hỏi khả thi ("có làm được không") | 2-3 câu mô tả câu hỏi + cách thử, bạn gật là thử; kết quả ghi thành research doc ở `docs/superpowers/research/`, code thử là đồ bỏ |
+| **Bug** | Sai hành vi: lỗi runtime, kết quả sai, test fail, regression | Không thiết kế cho triệu chứng — chuyển thẳng sang `qskill-systematic-debugging` tìm root cause, xong mới quay lại phân loại phần fix |
+| **Bounded** | Sửa nhỏ trên flow **đã có sẵn** trong repo | Không viết spec, nhưng vẫn ra **plan** qua `qskill-write-ba-plan` (`Spec:` ghi `none (bounded task)`) |
+| **Architectural** | Project/subsystem mới, thay đổi cách các thành phần ghép với nhau | Hỏi từng câu một → đề xuất 2-3 hướng → trình bày thiết kế theo từng phần, duyệt từng phần → ghi file spec → `qskill-write-ba-plan` |
 
-Nhánh nào cũng phải dừng chờ bạn duyệt trước khi làm tiếp — kể cả việc "đơn giản".
+### Gate xác nhận phân loại
+
+Ranh giới bounded ↔ architectural do **ý định của bạn** quyết định, không do kích thước diff — nên agent không được tự quyết. Khi rơi vào một trong hai nhánh này, agent phải dừng lại hỏi bạn (kèm 1 câu lý do vì sao chọn nhánh đó), **đúng 2 option, một chiều mỗi bên**:
+
+| Agent phân loại | Option 1 | Option 2 |
+|---|---|---|
+| **Bounded** | Đúng, tiếp tục | Nâng lên architectural |
+| **Architectural** | Đúng, tiếp tục | Hạ xuống bounded |
+
+Chưa có câu trả lời thì **chưa được làm gì** — không hỏi clarify, không explore context. Spike và bug bỏ qua gate này vì đã có gate riêng (spike chờ bạn gật kế hoạch thử; bug đi thẳng debugging skill).
+
+Sau gate, ratchet **một chiều**: giữa chừng phát hiện phức tạp ẩn thì được nâng lên, không bao giờ tự hạ xuống. Gate là chỗ duy nhất một nhánh được hạ, và chỉ khi bạn hạ.
+
+Nhánh nào cũng phải dừng chờ bạn duyệt trước khi implement — kể cả việc "đơn giản".
 
 ### Phong cách viết spec (nhánh Architectural)
 
@@ -180,7 +194,16 @@ Task: <số task>
 
 Slug **không đổi** suốt work stream: commit spec, commit plan, các commit implement, các commit review đều dùng chung một slug.
 
-Với `qskill-brainstorming`, hai nhánh **spike** và **bounded** cố tình không sinh spec/plan — nhưng vẫn **bắt buộc commit**, dùng slug `chore-YYYY-MM-DD` và bỏ trailer `Plan:`. Không có tài liệu không đồng nghĩa với không commit.
+Với `qskill-brainstorming`, không nhánh nào được bỏ commit — chỉ khác ở chỗ slug lấy từ tài liệu nào:
+
+| Nhánh | Slug lấy từ |
+|---|---|
+| **Spike** | tên file research doc (`YYYY-MM-DD-<topic>`) |
+| **Bounded** | tên file plan |
+| **Architectural** | tên file spec (bỏ hậu tố `-design`), rồi đến plan |
+| **Bug** | không có tài liệu riêng — nhánh này kết thúc ở root cause; slug theo nhánh mà phần fix được phân loại vào |
+
+Không viết spec **không** đồng nghĩa với không có tài liệu, và càng không đồng nghĩa với không commit. Trước khi báo xong, mọi nhánh đều phải chạy `git status --porcelain` — còn gì trong đó là còn việc chưa xong.
 
 **Vì sao path nằm ở body chứ không phải subject:** slug đã định danh duy nhất plan và tự suy ra được path, trong khi `docs/superpowers/plans/` lặp lại y hệt ở mọi commit và ngốn ~22 trong ~80 cột mà `git log --oneline` hiển thị, đẩy phần mô tả ra ngoài màn hình. Trailer `Plan:` vẫn giữ vì nó ghi path *thật* — phân biệt commit từ spec (`specs/...-design.md`) với commit từ plan (`plans/....md`), và vẫn đúng khi bạn đổi thư mục lưu tài liệu.
 

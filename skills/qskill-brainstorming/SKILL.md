@@ -26,8 +26,9 @@ the approval gate never does.
 
 Before your first question, classify the request and say the
 classification out loud — "this looks bounded, so I'll go straight to a
-short plan instead of writing a spec" — so your human partner can
-override it:
+short plan instead of writing a spec". If you landed on **bounded or
+architectural**, stop there and confirm it (see "Confirm The
+Classification"); spike and bug have their own gates and skip this one.
 
 - **Spike** — a feasibility question ("can we...", "is it possible...",
   "quick and dirty is fine") whose output is an answer, not code you
@@ -63,9 +64,33 @@ override it:
   [writing-specs](references/writing-specs.md) — read it before
   exploring approaches.
 
-When in doubt between two paths, take the heavier one. The ratchet is
-one-way: hidden complexity discovered mid-task upgrades the path —
-stop, say so, and step up. Nothing downgrades mid-task.
+When in doubt between two paths, take the heavier one and say so while
+asking — doubt is a reason to ask better, never a reason to skip the
+gate.
+
+After the gate the ratchet is one-way: hidden complexity discovered
+mid-task upgrades the path — stop, say so, and step up. Nothing
+downgrades mid-task. The gate is the ONE place a path can move down,
+and only because your human partner moved it.
+
+## Confirm The Classification
+
+<HARD-GATE>
+Announcing bounded or architectural is not confirming it. Stop and ask,
+and start nothing — no clarifying questions, no context exploration —
+until your human partner answers.
+</HARD-GATE>
+
+Ask with `AskUserQuestion`, in Vietnamese, with one sentence of
+reasoning for the path you picked. Two options, and the second one
+depends on where you landed:
+
+- Classified **bounded** → 1. Đúng, tiếp tục · 2. Nâng lên architectural
+- Classified **architectural** → 1. Đúng, tiếp tục · 2. Hạ xuống bounded
+
+Take their answer as given; do not argue the label. Why this gate
+exists: the bounded/architectural line is drawn by intent, and intent
+lives with your partner, not in the diff.
 
 ## Commits Apply To Every Path
 
@@ -138,6 +163,11 @@ artifact, never the approval.
 
 | Thought | Reality |
 |---------|---------|
+| "I said it's bounded, that's the announcement done" | Announcing is not confirming. Ask, then wait for the answer. |
+| "The classification is obvious, no need to ask" | Obvious to you, from the diff. Your partner classifies from intent. Ask anyway. |
+| "I'll ask about the path while I start exploring context" | Exploring is the path already running. The gate is before step 1, not alongside it. |
+| "They downgraded me to bounded but I know it's architectural" | Their answer replaces your judgement. Take the path they chose and move on. |
+| "They confirmed bounded, so I can downgrade later too" | The gate is the only place a path moves down. Mid-task, the ratchet is still one-way. |
 | "This is too simple to need a design" | Simple means a short design, not no design. Write the short plan, then wait for approval. |
 | "I'll call it bounded and skip the spec" | Reaching for a label to skip work IS the doubt — take the heavier path. |
 | "Bounded means nothing gets written down" | Bounded still produces a plan via qskill-write-ba-plan. A later session needs something to execute. |
@@ -158,8 +188,10 @@ artifact, never the approval.
 
 ## Checklist
 
-Classify first, announce the path, then create a task for each item on
-your path and complete them in order.
+Classify first, announce the path, and — for bounded or architectural —
+get it confirmed. Then create a task for each item on the confirmed
+path and complete them in order. If your partner moves the level, drop
+that checklist and run the other one from the top.
 
 **Spike:**
 1. **Explore project context** — enough to frame the probe
@@ -176,6 +208,7 @@ your path and complete them in order.
 3. **Re-classify the fix** — bounded or architectural, then run that path's checklist in full (approval gate and plan document included)
 
 **Bounded:**
+0. **Confirm the classification** — ask: tiếp tục / nâng lên architectural; nothing below starts before the answer
 1. **Explore project context** — check files, docs, recent commits
 2. **Ask clarifying questions** — one at a time, the ones that matter
 3. **Raise in chat only what your partner must decide** — open questions, choices between approaches, trade-offs; do not restate the whole design
@@ -183,6 +216,7 @@ your path and complete them in order.
 5. **Follow that skill's rules from there** — it owns the plan file, slug, commits, the user review gate, and the handoff to qskill-executing-plans
 
 **Architectural:**
+0. **Confirm the classification** — ask: tiếp tục / hạ xuống bounded; nothing below starts before the answer
 1. **Explore project context** — check files, docs, recent commits
 2. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 3. **Read [writing-specs](references/writing-specs.md)** — it owns approaches, design presentation, spec content and the spec document
@@ -198,6 +232,8 @@ your path and complete them in order.
 ```dot
 digraph brainstorming {
     "Classify: spike / bug / bounded / architectural" [shape=diamond];
+    "Bounded: tiếp tục / nâng lên?" [shape=diamond];
+    "Architectural: tiếp tục / hạ xuống?" [shape=diamond];
     "Invoke qskill-systematic-debugging" [shape=box];
     "Report root cause; re-classify the fix" [shape=box];
     "Present question + probe (2-3 sentences)" [shape=box];
@@ -221,8 +257,12 @@ digraph brainstorming {
 
     "Classify: spike / bug / bounded / architectural" -> "Present question + probe (2-3 sentences)" [label="spike"];
     "Classify: spike / bug / bounded / architectural" -> "Invoke qskill-systematic-debugging" [label="bug"];
-    "Classify: spike / bug / bounded / architectural" -> "Ask clarifying questions (bounded)" [label="bounded"];
-    "Classify: spike / bug / bounded / architectural" -> "Explore project context" [label="architectural"];
+    "Classify: spike / bug / bounded / architectural" -> "Bounded: tiếp tục / nâng lên?" [label="bounded"];
+    "Classify: spike / bug / bounded / architectural" -> "Architectural: tiếp tục / hạ xuống?" [label="architectural"];
+    "Bounded: tiếp tục / nâng lên?" -> "Ask clarifying questions (bounded)" [label="tiếp tục"];
+    "Bounded: tiếp tục / nâng lên?" -> "Explore project context" [label="nâng lên"];
+    "Architectural: tiếp tục / hạ xuống?" -> "Explore project context" [label="tiếp tục"];
+    "Architectural: tiếp tục / hạ xuống?" -> "Ask clarifying questions (bounded)" [label="hạ xuống"];
     "Invoke qskill-systematic-debugging" -> "Report root cause; re-classify the fix";
     "Report root cause; re-classify the fix" -> "Classify: spike / bug / bounded / architectural";
     "Present question + probe (2-3 sentences)" -> "Human approves probe?";
