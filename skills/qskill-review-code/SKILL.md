@@ -14,7 +14,9 @@ session. Before you resolve the target, before you open the source code, before 
 answer the user, before you write a single line.
 
 Then announce: **"Read review-common. Running `<mode>` mode."** The user must
-see that line; without it, you have not started this skill.
+see that line; without it, you have not started this skill. If the user named
+no mode, the mode is `scan` — say "No mode given, defaulting to `scan`." in the
+same line, and do not ask which mode they meant.
 
 Skipping this step has exactly one outcome, and it has happened: you run the
 wrong mode, because the mode workflows exist only in that file. `scan` in
@@ -25,6 +27,7 @@ user before anything is written.
 |---|---|
 | "I know this skill already" | The workflows are not in this file. You do not know them from here. |
 | "The mode is obvious from the scope table" | The scope table says what a mode may touch, never how it runs. |
+| "They said 'review this' so the mode is `review`" | A mode is named explicitly or not at all. Anything else defaults to `scan`. |
 | "It is a long file, I will read the part I need" | You cannot tell which part you need before reading it. Read it in full. |
 | "I read it earlier in this session" | Then say so in the announcement and continue. Otherwise, read it. |
 

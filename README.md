@@ -223,6 +223,8 @@ Quy tắc đầy đủ nằm ở `skills/qskill-executing-plans/references/commi
 
 Hai skill này cùng cơ chế: gọi skill, nói rõ **role** muốn chạy (`review` / `feedback` / `scan`) và artifact cần review (Plan/Spec, hoặc thêm Source Code với `review-code`).
 
+**Không nói role thì mặc định là `scan`.** Agent không được hỏi lại bạn muốn role nào, cũng không được suy từ cách bạn diễn đạt ("review giúp tôi" vẫn là `scan`) — chỉ role gọi tên rõ ràng mới tính. Lý do chọn `scan` làm mặc định: nó **không ghi gì cả**, kết thúc bằng câu hỏi ghi report hay fix luôn, nên đoán sai chỉ tốn một câu hỏi thay vì tốn một file report hoặc một lần sửa nhầm artifact.
+
 - `qskill-review-plan` — review Plan/Spec, **không đụng tới source code**.
 - `qskill-review-code` — review source code implementation so với Plan đã duyệt.
 

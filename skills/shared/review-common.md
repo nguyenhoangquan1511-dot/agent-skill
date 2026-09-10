@@ -32,7 +32,16 @@ skill's value.
 
 # Execution Modes
 
-Three modes. The user names one; never run two in a single execution.
+Three modes; never run two in a single execution.
+
+**Default: `scan`.** When the user names a mode, run that one. When the user
+names none — "review giúp tôi", a bare invocation, a path with no mode word —
+run `scan`, and say so in the announcement: **"No mode given, defaulting to
+`scan`."** Do not ask which mode; do not infer one from the phrasing.
+
+Scan is the safe default because it writes nothing: it ends by asking the user
+to choose `review` or fix-now, so a wrong guess costs a question rather than a
+report file or an edit to TARGET.
 
 ## review
 
@@ -534,6 +543,7 @@ Never
 
 - modify TARGET during review mode
 - modify TARGET or the review report during scan mode
+- run `review` or `feedback` when the user named no mode — that case is `scan`
 - ignore an OPEN issue
 - recreate the review report
 - write the review report anywhere but `docs/superpowers/reviews/`
