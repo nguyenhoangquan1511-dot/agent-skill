@@ -71,7 +71,10 @@ rejected as INVALID, which updates the review report only.
 
 - Analyze TARGET as thoroughly as `review` (full depth, same evidence rules).
 - Classify every finding using the Severity Scale.
-- Summarize findings by severity count and list every High/Critical finding.
+- Summarize findings by severity count and list every finding, highest severity
+  first.
+- Add fix-cost context from that same analysis — how complex each listed finding
+  is, how much it touches, and which next step you would pick.
 - Ask the user to choose exactly one next step: write the review report
   (`review`), or fix now (resolve directly, without requiring a report entry).
 
@@ -356,9 +359,10 @@ on a bare count.
    do not write the review report at this stage.
 4. Present a summary
    - Total count broken down by severity (Critical / High / Medium / Low).
-   - If High + Critical > 0, list each one with its Location and a one-line
-     Problem.
-5. Ask the user to choose exactly one
+   - List every finding with its Location and a one-line Problem, grouped by
+     severity, highest first.
+5. Add the fix-cost line — see Scan Fix Cost.
+6. Ask the user to choose exactly one
    - **Write the report** — reuse the analysis just produced and continue with
      the Review Workflow (create Issue IDs, write the report). Do not
      re-analyze from scratch.
@@ -367,12 +371,54 @@ on a bare count.
      Feedback Workflow — including its verification step — except that creating
      an Issue ID and writing the review report is optional for this pass. An existing report for this artifact, if
      any, may optionally note the fix as a supplement to its latest round.
-6. Continue with whichever path was chosen. Scan itself never modifies TARGET
+7. Continue with whichever path was chosen. Scan itself never modifies TARGET
    or the review report.
-7. Whichever path was chosen, any finding that cannot be resolved without a
+8. Whichever path was chosen, any finding that cannot be resolved without a
    human decision is presented in chat — see Presenting DISCUSS Issues. A
    "fix now" pass that leaves such findings behind must present them, not just
    count them.
+
+---
+
+# Scan Fix Cost
+
+Applies to `scan` only. The severity summary says how bad the findings are, not
+what fixing them costs — and the user needs both to choose between the report
+and a fix. So answer it yourself, entirely from the analysis you have just done.
+No extra investigation for the estimate: if the scan did not establish
+something, say "chưa xác định" instead of going to look.
+
+Estimate per finding — every finding, at every severity. A Medium or Low finding
+was analyzed just as fully as a High one, so its cost is already known; leaving
+it out only hides the cheap fixes, which are exactly the ones a user picks off
+straight away.
+
+- **Complexity** — Trivial (localized edits), Bounded (several edits inside one
+  module/section), or Architectural (crosses a contract or an agreed decision in
+  BASELINE).
+- **Size** — roughly how many files and how many lines, as a range. For
+  review-plan, count Plan sections instead of files.
+
+A per-finding estimate is what makes the findings separable: the user reads the
+Problem and its cost together, and can decide to fix two of them now and leave
+the rest. An aggregate alone hides which finding carries the cost.
+
+Keep it compact so the list stays readable. Critical and High findings get the
+estimate on their own line under the Problem; Medium and Low findings carry it
+in parentheses at the end of their single line. A Low finding rarely needs more
+than "Trivial, 1 file, ~2 dòng".
+
+Then close with one **recommendation** for the set — fix now, or write the
+report, in one clause. Fix now when everything is small and nothing needs a
+human decision; write the report when anything is Critical, architectural,
+contested, or simply numerous.
+
+Never ask the user how complex a finding is or how much it touches — they are
+asking because you read the artifact and they did not. Say it is an estimate,
+and do not invent a number for something the scan never reached.
+
+The recommendation is advice. The user may pick the other option, and that
+choice is followed without re-arguing it.
 
 ---
 
@@ -562,6 +608,8 @@ Never
 - mark RESOLVED without updating TARGET
 - update TARGET without updating the review report (except the `scan` "fix now"
   path — see Scan Workflow)
+- end a `scan` without the fix-cost line, or ask the user to assess complexity
+  or size themselves (see Scan Fix Cost)
 - end an execution by reporting only the number of DISCUSS or INVALID issues —
   every one of them is presented in the same message (see Presenting DISCUSS
   Issues and Presenting INVALID Issues)
@@ -724,12 +772,25 @@ Scan completed.
 
 Summary: Critical: a, High: b, Medium: c, Low: d
 
-<Location + one-line Problem for each High/Critical finding, if any>
+For each Critical/High finding:
+- [<Severity>] <Location> — <one-line Problem>
+  <Trivial | Bounded | Architectural>, ~<n> file, ~<n>-<m> dòng
+
+For each Medium/Low finding:
+- [<Severity>] <Location> — <one-line Problem> (<complexity>, ~<n> file, ~<n> dòng)
+
+Tổng: <Trivial | Bounded | Architectural>, ~<n> file, ~<n>-<m> dòng
+Khuyến nghị: <Fix now | Write the review report> — <one clause>
 
 Which do you want?
 1. Write the review report
 2. Fix now
 ```
+
+The per-finding estimates, the total and the recommendation are part of the scan
+output, not an optional extra. Every finding appears with its estimate whatever
+its severity, and the total and recommendation appear even when nothing reaches
+High.
 
 If the "fix now" path runs and leaves findings that need a human decision, the
 completion message for that pass carries the DISCUSS presentation too.

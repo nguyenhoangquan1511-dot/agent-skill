@@ -236,20 +236,29 @@ Cả hai đều duy trì **1 file report duy nhất** cho mỗi artifact tại `
 |---|---|---|---|
 | **review** | Phân tích toàn diện, phát hiện issue mới, đối chiếu lại issue cũ | Không | Có — ghi/cập nhật report |
 | **feedback** | Kiểm chứng từng issue đang `OPEN` trước khi làm theo: issue đúng thì sửa tới `RESOLVED`; issue sai thì phản biện, để nguyên artifact và đánh `INVALID` kèm bằng chứng; cần người quyết định thì `DISCUSS` | Có (trừ issue `INVALID` / `DISCUSS`) | Có — đồng bộ report theo từng thay đổi |
-| **scan** | Phân tích đầy đủ như `review`, nhưng **chưa ghi report ngay** — tóm tắt số lượng issue theo mức độ rồi hỏi bạn muốn ghi report hay fix luôn | Chỉ khi bạn chọn "fix luôn" | Chỉ khi bạn chọn "ghi report"; nếu chọn "fix luôn" thì không bắt buộc |
+| **scan** | Phân tích đầy đủ như `review`, nhưng **chưa ghi report ngay** — tóm tắt số lượng issue theo mức độ, ước lượng công sức fix (độ phức tạp / số file / số dòng) kèm khuyến nghị, rồi hỏi bạn muốn ghi report hay fix luôn | Chỉ khi bạn chọn "fix luôn" | Chỉ khi bạn chọn "ghi report"; nếu chọn "fix luôn" thì không bắt buộc |
 
 **Khi nào dùng `scan`**: đây là role trung gian, dùng khi bạn chưa biết Plan/Code còn nhiều lỗi hay không và muốn quyết định hướng xử lý trước khi tốn 1 vòng review + feedback riêng biệt. Chạy `scan`, agent sẽ:
 
 1. Phân tích đầy đủ (không rút gọn, không bỏ sót — cùng độ sâu với `review`).
 2. Phân loại từng issue theo **Severity Scale** (bảng bên dưới).
-3. In ra thống kê:
+3. In ra thống kê, liệt kê **mọi issue** theo thứ tự mức độ giảm dần, kèm ước lượng của từng cái và một dòng tổng — tất cả lấy từ phần phân tích vừa chạy, không đi tìm hiểu thêm:
    ```
    Tổng: N issues — Critical: a, High: b, Medium: c, Low: d
 
-   - [High] <location> — <problem 1 dòng>
    - [Critical] <location> — <problem 1 dòng>
+     <Trivial | Bounded | Architectural>, ~<n> file, ~<n>-<m> dòng
+   - [High] <location> — <problem 1 dòng>
+     <Trivial | Bounded | Architectural>, ~<n> file, ~<n>-<m> dòng
+   - [Medium] <location> — <problem 1 dòng> (<độ phức tạp>, ~<n> file, ~<n> dòng)
+   - [Low] <location> — <problem 1 dòng> (Trivial, 1 file, ~2 dòng)
+
+   Tổng: <Trivial | Bounded | Architectural>, ~<n> file, ~<n>-<m> dòng
+   Khuyến nghị: <Fix luôn | Ghi report> — <lý do ngắn>
    ```
-4. Hỏi bạn chọn 1 trong 2, dùng lại đúng kết quả phân tích vừa có (không phân tích lại từ đầu):
+   Ước lượng theo từng issue để bạn tách được: đọc problem và giá của nó cùng lúc, chọn fix 2 cái trước và để lại phần còn lại. Dòng tổng gộp lại thì không biết cái nào đang gánh chi phí. Medium/Low cũng đã được phân tích đầy đủ nên cũng có ước lượng — bỏ chúng ra chỉ giấu mất mấy cái fix rẻ, vốn là thứ dễ làm luôn nhất. Medium/Low viết gọn 1 dòng, Critical/High mới xuống dòng riêng.
+   Agent phải tự trả lời, không được hỏi ngược bạn "cái này có phức tạp không". Chỗ nào scan chưa đọc tới thì ghi "chưa xác định", không bịa số. Khuyến nghị chỉ là tư vấn — bạn chọn ngược lại thì agent làm theo bạn.
+5. Hỏi bạn chọn 1 trong 2, dùng lại đúng kết quả phân tích vừa có (không phân tích lại từ đầu):
    - **Ghi report** → tiếp tục như role `review`, tạo Issue ID và ghi vào report, chưa sửa gì.
    - **Fix luôn** → sửa trực tiếp Plan/Code cho các issue đã tìm thấy, không bắt buộc phải ghi report cho lượt này.
 
@@ -262,7 +271,7 @@ Cả hai đều duy trì **1 file report duy nhất** cho mỗi artifact tại `
 | **High** | Sai hướng đã thống nhất trong Plan, hoặc chặn đứng main flow trong phạm vi task đang xét |
 | **Critical** | Ảnh hưởng ra ngoài phạm vi task/feature, tới cả hệ thống: mất dữ liệu, lỗ hổng bảo mật, phá vỡ tính năng khác. Cân nhắc kỹ, không gán bừa |
 
-"High trở lên" = High + Critical — dùng trong thống kê của role `scan`.
+"High trở lên" = High + Critical — dùng khi quyết định issue nào phải trình bày đầy đủ trong chat.
 
 ### Cung cấp Plan cho skill: không bắt buộc phải là đường dẫn chính xác
 
