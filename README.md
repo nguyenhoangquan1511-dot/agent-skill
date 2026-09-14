@@ -33,11 +33,11 @@ Chỉ 7 skill sau hiện trong danh sách skill của agent:
 - `qskill-write-ba-plan` — viết implementation plan từ spec, thuần hành vi (BA), không code kể cả code inline. **Đây là skill mặc định các skill khác trỏ tới**
 - `qskill-writing-plans` — bản plan cũ theo hướng skeleton (có signature, cho phép block type/contract); giữ lại cho ai cần
 - `qskill-executing-plans` — thực thi plan (kèm toàn bộ reference doc của pha thực thi)
-
-Khi tool hỗ trợ subagent, **mọi skill đều giao việc cho subagent theo `shared/subagent-delegation.md`**: model chính chỉ làm lead (lập todo, dispatch, phán xét kết quả) để tiết kiệm token. `qskill-executing-plans` chạy **tuần tự** một implementer mỗi lần trên branch hiện tại; các skill còn lại được **fan-out song song** nhiều agent cho các phần việc độc lập.
 - `qskill-review-plan` — review và cải thiện plan/spec
 - `qskill-review-code` — review code so với plan đã duyệt
 - `qskill-systematic-debugging` — tìm root cause trước khi fix
+
+Khi tool hỗ trợ subagent, **mọi skill đều có thể giao việc cho subagent theo `shared/subagent-delegation.md`** — model chính chỉ làm lead (lập todo, dispatch, phán xét kết quả) để tiết kiệm token — nhưng chỉ sau khi **bạn duyệt ở `shared/subagent-gate.md`**; không duyệt thì chạy inline. `qskill-executing-plans` chạy **tuần tự** một implementer mỗi lần trên branch hiện tại; các skill còn lại được **fan-out song song** nhiều agent cho các phần việc độc lập.
 
 Tất cả skill đều đổi tên với prefix `qskill-` (cả tên thư mục lẫn field `name:` trong frontmatter) để tránh trùng tên với skill khác đã có sẵn trên máy bạn.
 
@@ -67,7 +67,21 @@ Các workflow phụ nằm trong `qskill-executing-plans/references/`, chỉ đư
 | File | Nội dung |
 |---|---|
 | `review-common.md` | Toàn bộ luật chung của `qskill-review-plan` và `qskill-review-code`: 3 mode, Plan Resolution, vị trí/tên report, Issue Structure, Severity Scale, lifecycle, workflow, validation, self-review, Git + commit message. Sửa luật chung chỉ cần sửa file này |
-| `subagent-delegation.md` | Luật giao việc cho subagent dùng chung cho **mọi** skill: kiểm tra tool có chạy được subagent không, hỏi chính sách khi subagent lỗi (dừng hay model chính tiếp quản), chọn role/model (Oh-My-Pi: role `task` mặc định, `tiny` dự phòng), vai trò lead của model chính, chạy tuần tự hay song song, contract của prompt dispatch, thang escalate 3 vòng khi subagent làm sai (vòng 3 goal-locked, blocked thì lead tự làm và bạn là người review) |
+| `subagent-gate.md` | **Có dùng subagent hay không** — cổng vào của file dưới, áp cho cả 7 skill: quyết định là của bạn, agent chỉ được đề xuất rồi dừng chờ |
+| `subagent-delegation.md` | **Dùng subagent thế nào** (sau khi bạn đã duyệt): kiểm tra tool có chạy được subagent không, hỏi chính sách khi subagent lỗi (dừng hay model chính tiếp quản), chọn role/model (Oh-My-Pi: role `task` mặc định, `tiny` dự phòng), vai trò lead của model chính, chạy tuần tự hay song song, contract của prompt dispatch, thang escalate 3 vòng khi subagent làm sai (vòng 3 goal-locked, blocked thì lead tự làm và bạn là người review) |
+
+### Gate xác nhận subagent (áp cho mọi skill)
+
+Tool có chạy được subagent **không có nghĩa là được dùng subagent**. Mặc định mọi skill chạy inline trong session hiện tại; agent không được tự quyết — kể cả khi việc nhìn có vẻ song song được, kể cả khi chính skill đó có sẵn section Delegation.
+
+Agent chỉ được dispatch khi **trong lượt chạy hiện tại**:
+
+- bạn chủ động yêu cầu dùng subagent / agent song song / gọi tên một agent cụ thể, hoặc
+- bạn duyệt đề xuất mà agent đưa ra ở gate này.
+
+Đề xuất phải cụ thể và chỉ đưa **đúng 1 lần**: lý do, dispatch mấy con, tuần tự hay song song, mỗi con làm gì, role/model nào, workspace nào. Câu hỏi chính sách khi subagent chết (dừng báo cáo / lead tiếp quản) được hỏi **chung một lượt** với đề xuất — một lần dừng, hai câu trả lời. Bạn từ chối hoặc không trả lời → chạy inline, không đề xuất lại lượt đó.
+
+Duyệt một đề xuất chỉ có hiệu lực đúng phạm vi đề xuất đó; duyệt "dùng subagent cho lần chạy này" thì phủ cả lượt, gồm cả dispatch phụ (fix agent, reviewer agent) và các vòng escalate. Duyệt ở lượt trước **không** tự động chuyển sang lượt sau.
 
 ## Cách dùng `qskill-brainstorming` (viết spec)
 
@@ -238,8 +252,25 @@ Cả hai đều duy trì **1 file report duy nhất** cho mỗi artifact tại `
 | Role | Làm gì | Có sửa Plan/Code không? | Có ghi report không? |
 |---|---|---|---|
 | **review** | Phân tích toàn diện, phát hiện issue mới, đối chiếu lại issue cũ | Không | Có — ghi/cập nhật report |
-| **feedback** | Kiểm chứng từng issue đang `OPEN` trước khi làm theo: issue đúng thì sửa tới `RESOLVED`; issue sai thì phản biện, để nguyên artifact và đánh `INVALID` kèm bằng chứng; cần người quyết định thì `DISCUSS` | Có (trừ issue `INVALID` / `DISCUSS`) | Có — đồng bộ report theo từng thay đổi |
+| **feedback** | Kiểm chứng từng issue đang `OPEN` trước khi làm theo: issue đúng thì sửa tới `RESOLVED`; issue sai thì phản biện, để nguyên artifact và đánh `INVALID` kèm bằng chứng; cần người quyết định thì `DISCUSS`. Riêng issue **High trở lên phải được bạn duyệt từng cái** mới được sửa | Có (trừ issue `INVALID` / `DISCUSS`, và issue High chưa được duyệt) | Có — đồng bộ report theo từng thay đổi |
 | **scan** | Phân tích đầy đủ như `review`, nhưng **chưa ghi report ngay** — tóm tắt số lượng issue theo mức độ, ước lượng công sức fix (độ phức tạp / số file / số dòng) kèm khuyến nghị, rồi hỏi bạn muốn ghi report hay fix luôn | Chỉ khi bạn chọn "fix luôn" | Chỉ khi bạn chọn "ghi report"; nếu chọn "fix luôn" thì không bắt buộc |
+
+**Cổng duyệt issue High trong `feedback`**: issue High/Critical không được sửa nếu bạn chưa duyệt đúng issue đó. Agent trình bày **mỗi lần đúng 1 issue** — vấn đề là gì, sẽ sửa theo hướng nào, chạm vào đâu — rồi dừng chờ bạn:
+
+```
+ISSUE-03 [High] lib/install.js:42
+  Vấn đề: copy fail giữa chừng để lại skill nửa vời
+  Sẽ sửa: gom copy vào temp rồi rename, fail thì xoá temp
+  Chạm: install.js (~35 dòng)
+
+Duyệt không? (duyệt / bỏ qua / làm cách khác)
+
+Còn lại 2 issue High+: ISSUE-07, ISSUE-11
+```
+
+Bạn duyệt → agent sửa đúng cái đó, báo kết quả ngắn, rồi **dừng tiếp**. Agent không tự nhảy sang issue sau; bạn bảo mới trình bày tiếp. Lý do: trình bày gộp thì chỉ cần bạn hỏi xoáy vào 1 issue là mấy cái còn lại trôi lên trên, phải scroll ngược mới thấy mình còn nợ quyết định nào. Dòng cuối liệt kê Issue ID còn lại để bạn biết chưa mất cái nào, nhưng trên màn hình vẫn chỉ có đúng 1 issue cần quyết.
+
+Bỏ qua → issue chuyển `DISCUSS`, artifact giữ nguyên, lần chạy sau không âm thầm sửa lại. Medium/Low vẫn sửa thẳng không hỏi — cổng này dựng cho issue nặng, không phải cho thủ tục.
 
 **Khi nào dùng `scan`**: đây là role trung gian, dùng khi bạn chưa biết Plan/Code còn nhiều lỗi hay không và muốn quyết định hướng xử lý trước khi tốn 1 vòng review + feedback riêng biệt. Chạy `scan`, agent sẽ:
 

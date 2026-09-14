@@ -11,10 +11,11 @@ Load plan, review critically, execute all tasks, report when complete.
 
 **Announce at start:** "I'm using the qskill-executing-plans skill to implement this plan."
 
-**Default:** Delegate the work when the host can run subagents — see [Step 0.5: Delegation Gate](#step-05-delegation-gate). Otherwise follow the process below inline, on the current branch. Either way the workspace rule holds: current branch, no worktree without explicit user approval.
+**Default:** Run the process below inline, on the current branch. Delegating it to subagents is offered, never assumed — see [Step 0.5: Delegation Gate](#step-05-delegation-gate); the user's answer there decides the shape. Either way the workspace rule holds: current branch, no worktree without explicit user approval.
 
 **Reference docs** (read on demand, they are not standalone skills):
-- [../shared/subagent-delegation.md](../shared/subagent-delegation.md) — **required when delegating**: capability check, role selection, lead contract
+- [../shared/subagent-gate.md](../shared/subagent-gate.md) — **required before any dispatch**: subagents or inline is the user's call
+- [../shared/subagent-delegation.md](../shared/subagent-delegation.md) — **required once delegation is approved**: capability check, role selection, lead contract
 - [references/subagent-driven-development.md](references/subagent-driven-development.md) — same-session execution via subagents
 - [references/using-git-worktrees.md](references/using-git-worktrees.md) — isolated workspace setup
 - [references/test-driven-development.md](references/test-driven-development.md) — TDD loop for each task
@@ -35,25 +36,34 @@ the plan without version control.
 
 ### Step 0.5: Delegation Gate
 
-**REQUIRED REFERENCE when the check passes:** [../shared/subagent-delegation.md](../shared/subagent-delegation.md).
+**REQUIRED REFERENCES:** [../shared/subagent-gate.md](../shared/subagent-gate.md)
+first, then [../shared/subagent-delegation.md](../shared/subagent-delegation.md)
+once the user has chosen delegation.
 
 Check whether the host exposes a subagent mechanism (Claude `Task`/`Agent`
 tool, Codex / Pi / CommandCode subagent tool, Oh-My-Pi agent roles).
 
-- **Available →** delegate. You are the lead: you read the plan, keep the
-  todos and the ledger, dispatch one implementer per task, and judge every
-  report. You do not write the task's code yourself. Follow
-  [references/subagent-driven-development.md](references/subagent-driven-development.md)
-  for the per-task loop, with the two overrides below. Announce it in one
-  line; do not ask permission to delegate.
 - **Not available →** execute inline yourself, following the process below.
+  Say so in one line and do not raise the question again.
+- **Available →** propose delegation at the gate and **stop for the answer**.
+  Name the split you intend: one implementer per plan task, serial, on the
+  current branch, on which role. Availability is not the decision; the user's
+  answer is.
+  - **User chooses subagents →** you are the lead: you read the plan, keep the
+    todos and the ledger, dispatch one implementer per task, and judge every
+    report. You do not write the task's code yourself. Follow
+    [references/subagent-driven-development.md](references/subagent-driven-development.md)
+    for the per-task loop, with the two overrides below.
+  - **User chooses inline, or does not answer →** execute inline yourself. Do
+    not propose it again this execution.
 
-**Failure policy.** Before the first dispatch, ask the Step 1.5 question from
-[../shared/subagent-delegation.md](../shared/subagent-delegation.md) — if the
-subagents fail outright, stop and report, or take over inline? Record the
-answer in the progress ledger so it survives compaction, and apply it without
-asking again. Unanswered defaults to stop-and-report: the user may be away,
-and a hung execution they discover hours later is the worst outcome.
+**Failure policy.** Ask the Step 1.5 question from
+[../shared/subagent-delegation.md](../shared/subagent-delegation.md) in the
+same message as the gate proposal — if the subagents fail outright, stop and
+report, or take over inline? One stop, two answers. Record the answer in the
+progress ledger so it survives compaction, and apply it without asking again.
+Unanswered defaults to stop-and-report: the user may be away, and a hung
+execution they discover hours later is the worst outcome.
 
 **Escalation ladder.** A task's fix/re-review loop is bounded at three rounds
 (Step 7 of the shared guide): round 2 must change the role, the size, or the
@@ -160,13 +170,13 @@ check, live in [references/commit-convention.md](references/commit-convention.md
 **Don't force through blockers** - stop and ask.
 
 ## Remember
-- Delegate when the host can run subagents — one implementer at a time, on the current branch
 - Review plan critically first
 - Follow plan steps exactly
 - Don't skip verifications
 - Reference skills when plan says to
 - Stop when blocked, don't guess
 - Work inline on the current branch by default; never create a worktree or branch on your own
+- Run inline unless the user chose subagents at the Delegation Gate — see [subagent-gate](../shared/subagent-gate.md); when they did, delegate one implementer at a time on the current branch
 - Never start implementation on main/master branch without explicit user consent
 - Stop before any work if the directory is not a Git repository
 - Every commit starts with `[<plan-slug>]` (date included); nothing is left uncommitted at the end

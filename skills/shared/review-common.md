@@ -56,7 +56,9 @@ Review MUST NEVER modify TARGET.
 ## feedback
 
 - Verify every review issue before acting on it.
-- Resolve the issues that hold by updating TARGET.
+- Resolve the issues that hold by updating TARGET — but an issue at High or
+  above is resolved only after the user approves that specific issue, see the
+  High Approval Gate.
 - Reject the issues that do not hold, with evidence — see INVALID.
 - Synchronize the review report with every change to TARGET.
 - Keep TARGET and the review report consistent at all times.
@@ -273,7 +275,11 @@ that disproves the Problem.
 
 # Delegation
 
-**REQUIRED REFERENCE when the host can run subagents:**
+**GATE FIRST:** [subagent-gate.md](subagent-gate.md) — the user decides whether
+this run uses subagents at all. Propose the split below, stop for their answer,
+and run inline until it comes.
+
+**REQUIRED REFERENCE once they choose subagents:**
 [subagent-delegation.md](subagent-delegation.md) — capability check, role
 selection (Oh-My-Pi: role `task`, backup `tiny`), the lead contract, the
 dispatch prompt contract.
@@ -362,6 +368,8 @@ Problem is right. Verification is what separates feedback from transcription.
 
 **All three hold** — resolve it
 
+- If the issue is High or above, do not touch TARGET yet: it goes to the High
+  Approval Gate first, and is resolved only after the user approves it.
 - Update TARGET.
 - Update Status to RESOLVED.
 - Update Updated By, Updated At, Response.
@@ -388,6 +396,63 @@ on a bare count.
 
 ---
 
+# High Approval Gate
+
+Applies to `feedback`, and to the `scan` "fix now" path. **An issue at High or
+above is never resolved without the user's approval of that specific issue.**
+
+A High issue means TARGET deviates from the agreed direction or a main flow is
+blocked; a Critical one reaches beyond the current task. Fixing those silently
+and reporting afterwards leaves the user owning a change whose problem and
+direction they never saw. Medium and Low issues are resolved without asking —
+the gate exists for weight, not for ceremony.
+
+## How it runs
+
+Verify every OPEN issue first (Step 1 of the Feedback Workflow). Resolve the
+Medium and Low ones as usual. Then handle the High-or-above ones **one at a
+time**, highest severity first and Issue ID order within a severity:
+
+```
+<ISSUE-ID> [<Severity>] <Location>
+  Vấn đề: <1-2 câu, cụ thể — cái gì sai và hậu quả>
+  Sẽ sửa: <hướng xử lý, mô tả bằng hành vi, không phải diff>
+  Chạm: <file/section + ~<n> dòng>
+
+Duyệt không? (duyệt / bỏ qua / làm cách khác)
+
+Còn lại <n> issue High+: <ISSUE-ID list, one line>
+```
+
+Present exactly one issue, wait for the answer, apply it, report what was done
+in two or three lines — then **stop and wait**. The user says when to move to
+the next one; never present the following issue unasked, and never chain
+several of them in one message.
+
+Why one at a time: a batch of issues scrolls away as soon as the user drills
+into any single one of them, and then the decisions they still owe are somewhere
+above the fold. One issue on screen is one decision to make, with the follow-up
+questions about it staying next to it.
+
+The trailing line naming the remaining Issue IDs is what keeps the queue
+visible without presenting it — the user can see nothing is lost while still
+having only one issue in front of them.
+
+## What each answer does
+
+| Answer | Outcome |
+|---|---|
+| Approved | Resolve it as normal: update TARGET, Status RESOLVED, Response records that the user approved this direction. |
+| Approved with a different direction | Apply the user's direction, not the Recommendation. RESOLVED, and Response records the direction the user chose. |
+| Declined, or deferred | TARGET stays unchanged. Status DISCUSS, Response records that the user declined this fix for now, so the next execution does not silently retry it. |
+| Not reached yet | The issues still queued stay OPEN with TARGET untouched. They are named, not presented, until the user calls for the next one — silence is never approval. |
+
+Stopping at this gate is not a failed execution. An execution that ends with
+High issues still queued reports exactly that, and commits only the work already
+approved.
+
+---
+
 # Scan Workflow
 
 0. If the user gave no input, resolve the target first — see the skill's Scan
@@ -408,7 +473,9 @@ on a bare count.
      re-analyze from scratch.
    - **Fix now** — reuse the analysis just produced and resolve the findings
      directly in TARGET, following the same per-issue resolution as the
-     Feedback Workflow — including its verification step — except that creating
+     Feedback Workflow — including its verification step and the High Approval
+     Gate, so choosing "fix now" approves the pass, never the individual
+     High findings — except that creating
      an Issue ID and writing the review report is optional for this pass. An existing report for this artifact, if
      any, may optionally note the fix as a supplement to its latest round.
 7. Continue with whichever path was chosen. Scan itself never modifies TARGET
@@ -508,6 +575,10 @@ Every OPEN issue encountered during feedback must end in exactly one state.
 - INVALID
 
 Leaving an OPEN issue unchanged after processing is not allowed.
+
+One exception: a High-or-above issue the user has not answered at the High
+Approval Gate stays OPEN, with TARGET untouched, and is reported as awaiting
+approval.
 
 ---
 
@@ -642,6 +713,12 @@ Never
 - delete issues
 - modify immutable fields
 - resolve an issue without first verifying that its Problem still holds
+- update TARGET for a High-or-above issue before the user has approved that
+  specific issue (see the High Approval Gate)
+- present more than one High-or-above issue in a message, or move on to the next
+  one before the user asks for it
+- bundle several High issues into one yes/no, or read silence on an issue as
+  approval of it
 - apply a Recommendation known to contradict BASELINE instead of raising DISCUSS
 - mark INVALID without recording the disproving evidence in Response
 - mark INVALID to avoid a fix that is merely large or inconvenient
@@ -655,6 +732,8 @@ Never
   Issues and Presenting INVALID Issues)
 - make the user ask a second time before you describe an issue they have to
   decide on
+- dispatch a subagent for any part of a mode without the user's go-ahead for
+  this run (see [subagent-gate](subagent-gate.md))
 
 ---
 
@@ -694,6 +773,8 @@ The task completes only when
 - every required issue has been processed
 - every DISCUSS issue and every INVALID issue has been presented in chat, not
   just counted
+- every issue still queued at the High Approval Gate has been named, and the
+  next one presented in full
 - TARGET and the review report are synchronized
 - TARGET conforms to BASELINE
 - all validation rules pass
@@ -792,6 +873,9 @@ docs/superpowers/reviews/YYYY-MM-DD-<topic>SUFFIX.md
 
 RESOLVED: <n> issues (Issue ID list)
 
+Chờ bạn duyệt (still OPEN): <p> issues — <Issue ID list, one line>
+<the next one presented in full, per the High Approval Gate; the rest named only>
+
 Needs your decision (DISCUSS): <m> issues
 <for each: the presentation described in Presenting DISCUSS Issues>
 
@@ -803,7 +887,7 @@ Rejected as INVALID: <k> issues
 
 If `<m>` is 0, drop the DISCUSS block entirely. If it is not 0, the block is
 mandatory in this same message. The same rule applies to `<k>` and the INVALID
-block.
+block, and to `<p>` and the awaiting-approval block.
 
 **scan**
 
@@ -868,6 +952,11 @@ Do not create a commit if
 - validation fails
 - unresolved work remains
 - the task is incomplete
+
+An execution that stops at the High Approval Gate is the one case where a commit
+is still correct with issues left OPEN: the approved fixes are finished work and
+are committed, while the unapproved ones changed nothing to commit. Say in the
+completion message which issues are still waiting.
 
 Nothing produced by the execution may be left uncommitted. Before reporting
 completion, run `git status --porcelain` — anything still listed is unfinished

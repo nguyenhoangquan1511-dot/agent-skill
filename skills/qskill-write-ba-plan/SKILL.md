@@ -25,6 +25,8 @@ tasks. DRY. YAGNI. TDD. Frequent commits.
 
 **Context:** If working in an isolated worktree, it should have been created at execution time following [using-git-worktrees](../qskill-executing-plans/references/using-git-worktrees.md).
 
+**Write the plan inline**, in this session. Dispatching a subagent — to explore the codebase, to draft a section, to check the plan — needs the user's go-ahead for this run; see [subagent-gate](../shared/subagent-gate.md). The plan may still describe subagent-driven execution if the user asked for it, but choosing that shape stays their call at execution time.
+
 **Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
 - (User preferences for plan location override this default)
 
@@ -319,7 +321,11 @@ Right level:
 
 ## Delegation
 
-**REQUIRED REFERENCE when the host can run subagents:**
+**GATE FIRST:** [../shared/subagent-gate.md](../shared/subagent-gate.md) —
+the user decides whether this run uses subagents at all. Propose the split
+below, stop for their answer, and run inline until it comes.
+
+**REQUIRED REFERENCE once they choose subagents:**
 [../shared/subagent-delegation.md](../shared/subagent-delegation.md) —
 capability check, role selection (Oh-My-Pi: role `task`, backup `tiny`), the
 lead contract, the dispatch prompt contract.
@@ -417,9 +423,10 @@ Once your partner approves the plan:
 **"Plan approved. Continuing with qskill-executing-plans."**
 
 - **REQUIRED SKILL:** Use qskill-executing-plans.
-- Do not ask the user to choose an execution approach — that decision is not
-  theirs to make here. This is about *how* to execute (inline, worktree,
-  subagents), never about *whether* the plan was approved.
+- Do not re-open the approval here, and do not ask about the execution shape
+  here either: inline vs subagents is asked once, by qskill-executing-plans at
+  its Delegation Gate ([subagent-gate](../shared/subagent-gate.md)). Handing
+  off is about *how* to execute, never about *whether* the plan was approved.
 - qskill-executing-plans works inline on the current branch by default — no worktree, no new branch. If the current branch is `main`/`master` or otherwise unsuitable, it stops and asks the user before creating one; no extra confirmation is needed here.
 
 ## Red Flags

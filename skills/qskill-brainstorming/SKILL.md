@@ -20,6 +20,11 @@ project, or take any implementation action until you have told your
 human partner what you intend and they have approved it. This applies
 to EVERY task on EVERY path below — the ceremony scales with the task;
 the approval gate never does.
+
+The same holds for HOW the work runs: explore, research and write inline
+in this session. Dispatching a subagent — to research, to draft, to
+implement — is the user's decision, not yours. See
+[subagent-gate](../shared/subagent-gate.md).
 </HARD-GATE>
 
 ## Four Paths
@@ -329,7 +334,11 @@ plus a few questions plus a short in-chat design is the whole process.
 
 ## Delegation
 
-**REQUIRED REFERENCE when the host can run subagents:**
+**GATE FIRST:** [../shared/subagent-gate.md](../shared/subagent-gate.md) —
+the user decides whether this run uses subagents at all. Propose the split
+below, stop for their answer, and run inline until it comes.
+
+**REQUIRED REFERENCE once they choose subagents:**
 [../shared/subagent-delegation.md](../shared/subagent-delegation.md) —
 capability check, role selection (Oh-My-Pi: role `task`, backup `tiny`), the
 lead contract, the dispatch prompt contract.

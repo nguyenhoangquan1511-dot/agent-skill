@@ -3,7 +3,9 @@
 > **Shared guide** (not a standalone skill). Read when a skill says to delegate
 > work to subagents. It is the single source of truth for: capability
 > detection, role/model selection, the lead contract, concurrency, and
-> fallback on failure or quota exhaustion.
+> fallback on failure or quota exhaustion. **How** to delegate lives here;
+> **whether** to lives in [subagent-gate.md](subagent-gate.md), and the answer
+> there is the user's.
 
 The main model is a **lead**, not a worker. Its job is to hold the plan, split
 the work into tasks, dispatch them, and judge what comes back. Bulk reading,
@@ -27,11 +29,14 @@ mechanism. Check, once, at the start of the skill:
 inline.** Never simulate a subagent by role-playing one in your own context,
 and never claim work was delegated when it was not.
 
-If the capability exists, say so in one line and proceed — do not ask the user
-for permission to delegate. Delegation is the default whenever it is
-available. The only thing that needs explicit user consent is a change to the
-**workspace** (a new branch or worktree), which is a separate decision owned by
-the skill that needs it.
+If the capability exists, it is available — not chosen. **Whether this run
+delegates is the user's call: take the proposal to
+[subagent-gate.md](subagent-gate.md) and get their answer before anything is
+dispatched.** Inline until they choose subagents. Once they have, the rest of
+this guide governs and the gate is not revisited.
+
+A change to the **workspace** (a new branch or worktree) needs its own explicit
+consent, owned by the skill that needs it.
 
 ## Step 1.5: Failure Policy (ask once, before the first dispatch)
 
@@ -273,5 +278,6 @@ files:
   source file.
 - Run plan execution in parallel.
 - Paste prior-task history into a fresh dispatch.
-- Ask the user for permission to delegate — it is the default when available.
-  (Permission is still required for a new branch or worktree.)
+- Dispatch before the user has chosen subagents for this run at
+  [subagent-gate.md](subagent-gate.md) — availability is not a choice.
+  (A new branch or worktree needs its own separate consent.)

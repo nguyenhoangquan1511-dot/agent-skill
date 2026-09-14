@@ -41,6 +41,11 @@ Message. This file records only what is **specific** to review-plan. Where the t
 appear to conflict, the specific rule here wins, and only within what it
 actually covers. The workflow of each mode lives only in that file: reading this file alone is enough to know what a mode may touch, never enough to run it.
 
+**Inline until the user says otherwise** — reviewing, verifying and fixing
+happen in this session unless the user chose subagents for this run at
+[subagent-gate](../shared/subagent-gate.md). The size of the Plan never makes
+that call; only the user does. Once they approve, see Delegation below.
+
 ## Objective
 
 Review and continuously improve a Plan or Specification through iterative

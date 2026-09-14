@@ -21,6 +21,11 @@ NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST
 
 If you haven't completed Phase 1, you cannot propose fixes.
 
+**Investigate inline.** Reading code, reproducing, bisecting and fixing all
+happen in this session unless the user chose subagents for this run — see
+[subagent-gate](../shared/subagent-gate.md). A bug that spans many files is
+still an inline investigation.
+
 ## When to Use
 
 Use for ANY technical issue:
@@ -277,7 +282,11 @@ If systematic investigation reveals issue is truly environmental, timing-depende
 
 ## Delegation
 
-**REQUIRED REFERENCE when the host can run subagents:**
+**GATE FIRST:** [../shared/subagent-gate.md](../shared/subagent-gate.md) —
+the user decides whether this run uses subagents at all. Propose the split
+below, stop for their answer, and run inline until it comes.
+
+**REQUIRED REFERENCE once they choose subagents:**
 [../shared/subagent-delegation.md](../shared/subagent-delegation.md) —
 capability check, role selection (Oh-My-Pi: role `task`, backup `tiny`), the
 failure-policy question, the lead contract, the dispatch prompt contract.
