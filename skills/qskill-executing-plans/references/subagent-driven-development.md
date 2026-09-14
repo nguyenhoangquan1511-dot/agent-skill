@@ -8,10 +8,17 @@ Execute plan by dispatching a fresh implementer subagent per task, a task review
 
 **Core principle:** Fresh subagent per task + task review (spec + quality) + broad final review = high quality, fast iteration
 
+**Workspace:** the invoking skill owns it. When qskill-executing-plans dispatched
+you, implementers work inline on the current branch — its Workspace Rule and
+its Delegation Gate overrides govern, not the worktree assumptions below.
+
+**Serial:** one implementer at a time, always. Dispatch, wait, review, then
+dispatch the next — parallel implementers would edit the same working tree.
+
 **Narration:** between tool calls, narrate at most one short line — the
 ledger and the tool results carry the record.
 
-**Continuous execution:** Do not pause to check in with your human partner between tasks. Execute all tasks from the plan without stopping. The only reasons to stop are: BLOCKED status you cannot resolve, ambiguity that genuinely prevents progress, or all tasks complete. "Should I continue?" prompts and progress summaries waste their time — they asked you to execute the plan, so execute it.
+**Continuous execution:** Do not pause to check in with your human partner between tasks. Execute all tasks from the plan without stopping. The only reasons to stop are: BLOCKED status you cannot resolve, ambiguity that genuinely prevents progress, a failed dispatch (see Handling Dispatch Failures — role error, exhausted quota, or no report at all), or all tasks complete. "Should I continue?" prompts and progress summaries waste their time — they asked you to execute the plan, so execute it.
 
 ## When to Use
 
@@ -108,36 +115,22 @@ conflicts that only emerge from implementation.
 
 ## Model Selection
 
-Use the least powerful model that can handle each role to conserve cost and increase speed.
+**REQUIRED REFERENCE:** [../../shared/subagent-delegation.md](../../shared/subagent-delegation.md)
+— role/model selection, the Oh-My-Pi `task` default with `tiny` as backup, the
+lead contract, and the dispatch prompt contract live there. Always name the
+role explicitly on every dispatch; an omitted role inherits the controller's
+own model.
 
-**Mechanical implementation tasks** (isolated functions, clear specs, 1-2 files): use a fast, cheap model. Most implementation tasks are mechanical when the plan is well-specified.
-
-**Integration and judgment tasks** (multi-file coordination, pattern matching, debugging): use a standard model.
-
-**Architecture and design tasks**: use the most capable available model.
-The final whole-branch review is one of these — dispatch it on the most
-capable available model, not the session default.
-
-**Review tasks**: choose the model with the same judgment, scaled to the
-diff's size, complexity, and risk. A small mechanical diff does not need the
-most capable model; a subtle concurrency change does.
-
-**Always specify the model explicitly when dispatching a subagent.** An
-omitted model inherits your session's model — often the most capable and
-most expensive — which silently defeats this section.
-
-**Turn count beats token price.** Wall-clock and context cost scale with how
-many turns a subagent takes, and the cheapest models routinely take 2-3× the
-turns on multi-step work — costing more overall. Use a mid-tier model as the
-floor for reviewers and for implementers working from prose descriptions.
-When the task's plan text contains the complete code to write, the
-implementation is transcription plus testing: use the cheapest tier for
-that implementer. Single-file mechanical fixes also take the cheapest tier.
+Plan-execution specifics on top of that guide:
 
 **Task complexity signals (implementation tasks):**
 - Touches 1-2 files with a complete spec → cheap model
 - Touches multiple files with integration concerns → standard model
 - Requires design judgment or broad codebase understanding → most capable model
+
+The final whole-branch review is an architecture-level task — dispatch it on
+the most capable available model, not the session default. Review tasks scale
+with the diff's size, complexity, and risk.
 
 ## Handling Implementer Status
 
@@ -156,6 +149,59 @@ Implementer subagents report one of four statuses. Handle each appropriately:
 4. If the plan itself is wrong, escalate to the human
 
 **Never** ignore an escalation or force the same model to retry without changes. If the implementer said it's stuck, something needs to change.
+
+## Handling Dispatch Failures (no report at all)
+
+The four statuses above all assume the subagent answered. It may not: the role
+errors out, the quota runs out mid-plan, or the dispatch hangs and nothing
+comes back. This is not a status to interpret — it is a failed dispatch, and it
+is the failure most likely to strand the whole execution while nobody is
+watching.
+
+1. **Retry once on the backup role**, same prompt, same task. On Oh-My-Pi that
+   is role `tiny`; elsewhere it is the next tier down that can still do the
+   work.
+2. **If the retry also fails, stop dispatching.** Do not loop, do not walk
+   down the task list hoping the next dispatch works, and do not silently
+   absorb the task into your own context.
+3. **Write the state to the ledger before anything else** — which task failed,
+   which roles were tried, and what the error said. Quota failures are exactly
+   the case where your context may not survive to explain itself.
+4. **Apply the Step 1.5 failure policy** from
+   [../../shared/subagent-delegation.md](../../shared/subagent-delegation.md),
+   agreed with the user before the first dispatch: stop and report, or take
+   over inline. Say which one you are applying.
+
+**A dispatch that produces nothing is a failure, not a wait.** If a subagent
+has returned no report and no progress, treat it as failed rather than
+continuing to wait on it — a stalled dispatch and a dead one look identical
+from here, and the recovery is the same.
+
+**Quota is a plan-level resource.** When a quota failure hits, the tasks after
+this one will hit it too. Report it once, at the task where it happened, with
+the remaining task list — never discover it again five tasks later.
+
+**Exhausting a quota mid-plan is a symptom — say what caused it.** A plan whose
+tasks a human would implement in one pass each does not exhaust a quota by
+implementing them. What exhausts it is the loop: implementer, review, fix,
+re-review, fix again. Before reporting "out of quota", count the rounds spent
+per task from the ledger and report that number alongside it. If tasks were
+averaging more than one fix round, the cause is ambiguous briefs or oversized
+tasks, and more quota would only buy more loops — the fix belongs in the plan,
+not in the budget. The three-round cap in the Escalation Ladder is the spend
+limit that keeps this from happening; if a run blew through its quota, check
+first whether the cap was actually being enforced.
+
+**Do not confuse a quota failure with a blocked task.** They have opposite
+scopes:
+
+| | What it is | Scope |
+|---|---|---|
+| **Dispatch failure** (this section) | the mechanism died — role error, quota gone, nothing came back | **run-level**: stop dispatching, the next task would fail the same way |
+| **Round-3 BLOCKED** (Escalation Ladder) | the mechanism works, this one task keeps coming back wrong | **task-level**: you implement that task, then resume dispatching |
+
+This is the one exception to Continuous Execution above: a failed dispatch
+stops the run. Everything else continues without checking in.
 
 ## Handling Reviewer ⚠️ Items
 
@@ -387,6 +433,11 @@ Done!
 - Ignore subagent questions (answer before letting them proceed)
 - Accept "close enough" on spec compliance (reviewer found spec issues = not done)
 - Skip review loops (reviewer found issues = implementer fixes = review again)
+- Run that loop past three rounds, or re-dispatch round 2 unchanged — follow
+  the Escalation Ladder in
+  [../../shared/subagent-delegation.md](../../shared/subagent-delegation.md)
+- Stop delegating the rest of the plan because one task ended in a round-3
+  takeover — you implement that task, then dispatch the next one normally
 - Let implementer self-review replace actual review (both are needed)
 - Tell a reviewer what not to flag, or pre-rate a finding's severity in the
   dispatch prompt ("treat it as Minor at most") — the plan's example code is
@@ -400,6 +451,11 @@ Done!
 - Dispatch an implementer without `[PLAN_SLUG]` / `[PLAN_PATH]` filled in —
   the resulting commits cannot be grouped by plan
 - Finish with work left uncommitted (`git status --porcelain` must be clean)
+- Keep dispatching after a dispatch failed twice (default role + backup role) —
+  record it in the ledger and apply the Step 1.5 failure policy
+- Wait indefinitely on a subagent that has returned nothing — a stalled
+  dispatch is a failed dispatch
+- Hit an exhausted quota and keep trying the remaining tasks one by one
 
 **If subagent asks questions:**
 - Answer clearly and completely
@@ -409,7 +465,12 @@ Done!
 **If reviewer finds issues:**
 - Implementer (same subagent) fixes them
 - Reviewer reviews again
-- Repeat until approved
+- Repeat until approved — **bounded at three rounds** by the Escalation Ladder
+  in [../../shared/subagent-delegation.md](../../shared/subagent-delegation.md):
+  round 2 must change the role, the size, or the brief; round 3 is goal-locked
+  (DONE only if the named goal is met, otherwise BLOCKED); a BLOCKED there ends
+  the delegation — the controller finishes that task itself, without a further
+  review loop, and reports the takeover for the user to review.
 - Don't skip the re-review
 
 **If subagent fails task:**

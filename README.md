@@ -33,6 +33,8 @@ Chỉ 7 skill sau hiện trong danh sách skill của agent:
 - `qskill-write-ba-plan` — viết implementation plan từ spec, thuần hành vi (BA), không code kể cả code inline. **Đây là skill mặc định các skill khác trỏ tới**
 - `qskill-writing-plans` — bản plan cũ theo hướng skeleton (có signature, cho phép block type/contract); giữ lại cho ai cần
 - `qskill-executing-plans` — thực thi plan (kèm toàn bộ reference doc của pha thực thi)
+
+Khi tool hỗ trợ subagent, **mọi skill đều giao việc cho subagent theo `shared/subagent-delegation.md`**: model chính chỉ làm lead (lập todo, dispatch, phán xét kết quả) để tiết kiệm token. `qskill-executing-plans` chạy **tuần tự** một implementer mỗi lần trên branch hiện tại; các skill còn lại được **fan-out song song** nhiều agent cho các phần việc độc lập.
 - `qskill-review-plan` — review và cải thiện plan/spec
 - `qskill-review-code` — review code so với plan đã duyệt
 - `qskill-systematic-debugging` — tìm root cause trước khi fix
@@ -65,6 +67,7 @@ Các workflow phụ nằm trong `qskill-executing-plans/references/`, chỉ đư
 | File | Nội dung |
 |---|---|
 | `review-common.md` | Toàn bộ luật chung của `qskill-review-plan` và `qskill-review-code`: 3 mode, Plan Resolution, vị trí/tên report, Issue Structure, Severity Scale, lifecycle, workflow, validation, self-review, Git + commit message. Sửa luật chung chỉ cần sửa file này |
+| `subagent-delegation.md` | Luật giao việc cho subagent dùng chung cho **mọi** skill: kiểm tra tool có chạy được subagent không, hỏi chính sách khi subagent lỗi (dừng hay model chính tiếp quản), chọn role/model (Oh-My-Pi: role `task` mặc định, `tiny` dự phòng), vai trò lead của model chính, chạy tuần tự hay song song, contract của prompt dispatch, thang escalate 3 vòng khi subagent làm sai (vòng 3 goal-locked, blocked thì lead tự làm và bạn là người review) |
 
 ## Cách dùng `qskill-brainstorming` (viết spec)
 

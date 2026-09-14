@@ -327,6 +327,34 @@ plus a few questions plus a short in-chat design is the whole process.
 - Where existing code has problems that affect the work (e.g., a file that's grown too large, unclear boundaries, tangled responsibilities), include targeted improvements as part of the design - the way a good developer improves code they're working in.
 - Don't propose unrelated refactoring. Stay focused on what serves the current goal.
 
+## Delegation
+
+**REQUIRED REFERENCE when the host can run subagents:**
+[../shared/subagent-delegation.md](../shared/subagent-delegation.md) —
+capability check, role selection (Oh-My-Pi: role `task`, backup `tiny`), the
+lead contract, the dispatch prompt contract.
+
+When subagents are available you are the lead: you hold the conversation, the
+classification and the design judgment; subagents do the reading. Fan them out
+in parallel — the units here are independent by nature.
+
+**Delegate (parallel, one output file each):**
+- Surveying the current project state: structure, existing patterns, relevant
+  modules, recent commits.
+- One agent per open question that needs code or docs read to answer it.
+- Spike probes: one agent per candidate approach, each reporting findings
+  against the same question.
+
+**Never delegate:**
+- Asking the user questions, or interpreting their answers. One voice talks to
+  the user — yours.
+- The classification decision and its confirmation.
+- The design itself, or the spec / research document. You write those from
+  what the subagents found.
+
+Wait for the batch, read the reports, and only then ask your next question —
+questions built on a guess you could have delegated are wasted turns.
+
 ## Path References
 
 The rest of the process is path-specific. Read only the file for the path

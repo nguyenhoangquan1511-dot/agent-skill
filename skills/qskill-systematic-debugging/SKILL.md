@@ -275,6 +275,34 @@ If systematic investigation reveals issue is truly environmental, timing-depende
 
 **But:** 95% of "no root cause" cases are incomplete investigation.
 
+## Delegation
+
+**REQUIRED REFERENCE when the host can run subagents:**
+[../shared/subagent-delegation.md](../shared/subagent-delegation.md) —
+capability check, role selection (Oh-My-Pi: role `task`, backup `tiny`), the
+failure-policy question, the lead contract, the dispatch prompt contract.
+
+When subagents are available you are the lead: you hold the four phases, the
+evidence, and the hypothesis. Subagents gather. The phases still run in
+order — delegation makes each phase cheaper, it does not let you skip one.
+
+**Delegate (parallel, one output file each):**
+- Phase 1: one agent per evidence thread — trace this stack, read this log,
+  find what changed in this area, map the call path into this function. Ask
+  for findings and quotes, never for a fix.
+- Phase 2: one agent per working example to compare against the broken path.
+- Phase 3: when two or more hypotheses are independently testable, one agent
+  per hypothesis, each reporting the observed result of its minimal test.
+
+**Never delegate:**
+- The Iron Law. No subagent may change code in Phase 1–3, and no report that
+  proposes a fix is a licence to apply it.
+- Forming or choosing the hypothesis. Agents bring evidence; you reason.
+- Phase 4 verification — you confirm the failing test fails, then passes.
+
+A subagent that comes back with "I fixed it" has violated the process: discard
+the fix, keep the evidence, and continue from the phase you were in.
+
 ## Supporting Techniques
 
 These techniques are part of systematic debugging and available in this directory:

@@ -317,6 +317,35 @@ Right level:
    4. No matching rows means an empty result, not an error.
 ```
 
+## Delegation
+
+**REQUIRED REFERENCE when the host can run subagents:**
+[../shared/subagent-delegation.md](../shared/subagent-delegation.md) —
+capability check, role selection (Oh-My-Pi: role `task`, backup `tiny`), the
+lead contract, the dispatch prompt contract.
+
+When subagents are available you are the lead: you read the spec, decide the
+task breakdown, and write the plan. Subagents do the reconnaissance the plan
+needs to be concrete. Fan them out in parallel — one output file each.
+
+**Delegate (parallel):**
+- One agent per area the plan will touch: what already exists there, which
+  files own it, which patterns and conventions it follows, what the existing
+  tests cover. Ask for findings, not recommendations.
+- Verifying facts the plan will state: does this file/path/command exist,
+  what does this existing behaviour actually do today.
+- Checking whether a requirement in the spec is already implemented.
+
+**Never delegate:**
+- The task breakdown and their ordering.
+- Writing the plan document, or any part of it. A plan assembled from
+  subagent prose drifts in vocabulary between tasks — the single thing this
+  skill's self-review exists to catch.
+- The Self-Review below. It is yours, by design.
+
+Dispatch the whole batch before writing Task 1 — a plan written against a
+guess, then corrected, costs more than the wait.
+
 ## Self-Review
 
 After writing the complete plan, look at the spec with fresh eyes and check the plan against it. This is a checklist you run yourself — not a subagent dispatch.

@@ -11,9 +11,10 @@ Load plan, review critically, execute all tasks, report when complete.
 
 **Announce at start:** "I'm using the qskill-executing-plans skill to implement this plan."
 
-**Default:** Follow the process below — inline, on the current branch. Only switch to [references/subagent-driven-development.md](references/subagent-driven-development.md) when the user explicitly asks to use subagents for this execution; do not default into it just because subagents are available (subagent-driven execution creates a worktree per task, which is not the default workspace).
+**Default:** Delegate the work when the host can run subagents — see [Step 0.5: Delegation Gate](#step-05-delegation-gate). Otherwise follow the process below inline, on the current branch. Either way the workspace rule holds: current branch, no worktree without explicit user approval.
 
 **Reference docs** (read on demand, they are not standalone skills):
+- [../shared/subagent-delegation.md](../shared/subagent-delegation.md) — **required when delegating**: capability check, role selection, lead contract
 - [references/subagent-driven-development.md](references/subagent-driven-development.md) — same-session execution via subagents
 - [references/using-git-worktrees.md](references/using-git-worktrees.md) — isolated workspace setup
 - [references/test-driven-development.md](references/test-driven-development.md) — TDD loop for each task
@@ -31,6 +32,54 @@ Load plan, review critically, execute all tasks, report when complete.
 Run `git rev-parse --git-dir`. If the working directory is not a Git repository,
 STOP and ask the user to initialize Git before any work starts. Do not execute
 the plan without version control.
+
+### Step 0.5: Delegation Gate
+
+**REQUIRED REFERENCE when the check passes:** [../shared/subagent-delegation.md](../shared/subagent-delegation.md).
+
+Check whether the host exposes a subagent mechanism (Claude `Task`/`Agent`
+tool, Codex / Pi / CommandCode subagent tool, Oh-My-Pi agent roles).
+
+- **Available →** delegate. You are the lead: you read the plan, keep the
+  todos and the ledger, dispatch one implementer per task, and judge every
+  report. You do not write the task's code yourself. Follow
+  [references/subagent-driven-development.md](references/subagent-driven-development.md)
+  for the per-task loop, with the two overrides below. Announce it in one
+  line; do not ask permission to delegate.
+- **Not available →** execute inline yourself, following the process below.
+
+**Failure policy.** Before the first dispatch, ask the Step 1.5 question from
+[../shared/subagent-delegation.md](../shared/subagent-delegation.md) — if the
+subagents fail outright, stop and report, or take over inline? Record the
+answer in the progress ledger so it survives compaction, and apply it without
+asking again. Unanswered defaults to stop-and-report: the user may be away,
+and a hung execution they discover hours later is the worst outcome.
+
+**Escalation ladder.** A task's fix/re-review loop is bounded at three rounds
+(Step 7 of the shared guide): round 2 must change the role, the size, or the
+brief; round 3 is goal-locked — the implementer may report DONE only if the
+named, checkable goal is met, otherwise BLOCKED. A BLOCKED at round 3 ends the
+delegation for that task: you implement it yourself, inline, with no further
+review loop, then report the takeover — the user's review is the gate that
+replaces it. **The takeover covers that task only** — the next task goes back
+to a normal dispatch. Only a dead mechanism (Step 1.5) ends delegation for the
+whole run.
+
+**Override 1 — workspace.** `subagent-driven-development.md` assumes an
+isolated workspace per task. That does not apply here: every implementer works
+**inline on the current branch**, in the same working directory. The Workspace
+Rule below governs, and a worktree or a new branch still needs explicit user
+approval.
+
+**Override 2 — serial only.** Plan execution is serial. One implementer at a
+time: dispatch, wait for the report, review it, mark the task complete, then
+dispatch the next. Never run two implementers at once — they would edit the
+same working tree.
+
+**Role selection.** On Oh-My-Pi, dispatch every implementer and reviewer on
+role `task`, with role `tiny` as the backup used only when `task` errors or
+runs out of quota. On other hosts, pick the role per the table in
+[../shared/subagent-delegation.md](../shared/subagent-delegation.md).
 
 ### Step 1: Load and Review Plan
 0. Derive the **plan slug** from the plan filename — extension removed, **date kept** (`docs/superpowers/plans/2026-09-03-user-auth.md` -> `2026-09-03-user-auth`) — and use it in every commit of this execution. Never strip the date; feature names repeat across plans.
@@ -54,6 +103,10 @@ the plan without version control.
 - If a worktree is approved, place it under `.claude/worktrees/` with a descriptive name.
 
 ### Step 2: Execute Tasks
+
+When delegating (Step 0.5), this loop belongs to the dispatched implementer —
+you dispatch it, review its report, and record the result. When executing
+inline, you run it yourself.
 
 For each task:
 1. Mark as in_progress
@@ -107,6 +160,7 @@ check, live in [references/commit-convention.md](references/commit-convention.md
 **Don't force through blockers** - stop and ask.
 
 ## Remember
+- Delegate when the host can run subagents — one implementer at a time, on the current branch
 - Review plan critically first
 - Follow plan steps exactly
 - Don't skip verifications

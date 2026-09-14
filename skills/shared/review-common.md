@@ -271,6 +271,46 @@ that disproves the Problem.
 
 ---
 
+# Delegation
+
+**REQUIRED REFERENCE when the host can run subagents:**
+[subagent-delegation.md](subagent-delegation.md) — capability check, role
+selection (Oh-My-Pi: role `task`, backup `tiny`), the lead contract, the
+dispatch prompt contract.
+
+When subagents are available you are the lead in every mode: you own the
+Issue IDs, the severity calls, the review report, and the conversation with
+the user. Subagents do the analysis passes. Fan them out in parallel — one
+output file each.
+
+**Split the analysis into independent slices and dispatch them together.**
+Good slices for `review` and `scan`:
+
+- One agent per file, module, or plan section of TARGET.
+- One agent per review axis when TARGET is small enough that a per-file split
+  would be wasteful (e.g. one on BASELINE compliance, one on correctness, one
+  on test coverage).
+
+Every agent gets: its slice, BASELINE (as a path), the Severity Scale, the
+evidence rules, and the output contract — findings as `Location` +
+`Problem` + `Evidence` + proposed severity, written to its own file. It does
+**not** get Issue IDs, the existing report, or authority to edit anything.
+
+**Never delegate:**
+- Assigning or reusing Issue IDs, and the synchronization invariant.
+- The final severity of a finding. Subagents propose; you decide.
+- Writing or updating the review report.
+- Presenting DISCUSS issues, or any question to the user.
+- `feedback` mode's per-issue verification — the step that decides whether an
+  issue is real is the one you must not outsource. A fix, once decided, may be
+  dispatched.
+
+**Deduplicate before reporting.** Parallel agents on adjacent slices will
+report the same defect twice. Merge duplicates into one issue before any ID is
+assigned — two IDs for one defect breaks the synchronization invariant.
+
+---
+
 # Review Workflow
 
 1. Load BASELINE.
