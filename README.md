@@ -68,7 +68,7 @@ Các workflow phụ nằm trong `qskill-executing-plans/references/`, chỉ đư
 |---|---|
 | `review-common.md` | Toàn bộ luật chung của `qskill-review-plan` và `qskill-review-code`: 3 mode, Plan Resolution, vị trí/tên report, Issue Structure, Severity Scale, lifecycle, workflow, validation, self-review, Git + commit message. Sửa luật chung chỉ cần sửa file này |
 | `subagent-gate.md` | **Có dùng subagent hay không** — cổng vào của file dưới, áp cho cả 7 skill: quyết định là của bạn, agent chỉ được đề xuất rồi dừng chờ |
-| `subagent-delegation.md` | **Dùng subagent thế nào** (sau khi bạn đã duyệt): kiểm tra tool có chạy được subagent không, hỏi chính sách khi subagent lỗi (dừng hay model chính tiếp quản), chọn role/model (Oh-My-Pi: role `task` mặc định, `tiny` dự phòng), vai trò lead của model chính, chạy tuần tự hay song song, contract của prompt dispatch, thang escalate 3 vòng khi subagent làm sai (vòng 3 goal-locked, blocked thì lead tự làm và bạn là người review) |
+| `subagent-delegation.md` | **Dùng subagent thế nào** (sau khi bạn đã duyệt): kiểm tra tool có chạy được subagent không, hỏi chính sách khi subagent lỗi (dừng hay model chính tiếp quản), chọn role/model (Oh-My-Pi: role `task` mặc định, `tiny` dự phòng; **tool khác không có sẵn cặp này thì agent phải liệt kê các model/agent nó thực sự nhìn thấy, kèm đề xuất default + backup, để bạn chọn — không được tự ý pick, cũng không được hỏi trống "muốn dùng model nào?"**), vai trò lead của model chính, chạy tuần tự hay song song, contract của prompt dispatch, thang escalate 3 vòng khi subagent làm sai (vòng 3 goal-locked, blocked thì lead tự làm và bạn là người review) |
 
 ### Gate xác nhận subagent (áp cho mọi skill)
 
@@ -79,7 +79,7 @@ Agent chỉ được dispatch khi **trong lượt chạy hiện tại**:
 - bạn chủ động yêu cầu dùng subagent / agent song song / gọi tên một agent cụ thể, hoặc
 - bạn duyệt đề xuất mà agent đưa ra ở gate này.
 
-Đề xuất phải cụ thể và chỉ đưa **đúng 1 lần**: lý do, dispatch mấy con, tuần tự hay song song, mỗi con làm gì, role/model nào, workspace nào. Câu hỏi chính sách khi subagent chết (dừng báo cáo / lead tiếp quản) được hỏi **chung một lượt** với đề xuất — một lần dừng, hai câu trả lời. Bạn từ chối hoặc không trả lời → chạy inline, không đề xuất lại lượt đó.
+Đề xuất phải cụ thể và chỉ đưa **đúng 1 lần**: lý do, dispatch mấy con, tuần tự hay song song, mỗi con làm gì, role/model nào, workspace nào. Câu hỏi chính sách khi subagent chết (dừng báo cáo / lead tiếp quản) được hỏi **chung một lượt** với đề xuất — và nếu tool không có sẵn cặp role mặc định thì câu hỏi chọn model cũng nằm trong lượt đó: một lần dừng, trả lời hết. Bạn từ chối hoặc không trả lời (kể cả không chọn model) → chạy inline, không đề xuất lại lượt đó.
 
 Duyệt một đề xuất chỉ có hiệu lực đúng phạm vi đề xuất đó; duyệt "dùng subagent cho lần chạy này" thì phủ cả lượt, gồm cả dispatch phụ (fix agent, reviewer agent) và các vòng escalate. Duyệt ở lượt trước **không** tự động chuyển sang lượt sau.
 

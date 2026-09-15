@@ -35,7 +35,9 @@ offer — and stop:
 ```
 Proposing subagents: <why this work splits well, one sentence>
   Dispatch: <n> subagents, <serial | parallel> — <what each one does, one line each>
-  Role/model: <role per subagent>
+  Role/model: <the named default/backup pair, when this host has one;
+               otherwise the candidates you can see, with your recommended
+               default and backup, as a question>
   Workspace: <inline on the current branch | which worktree>
 
 Subagents or inline? (subagents / inline)
@@ -43,8 +45,14 @@ Subagents or inline? (subagents / inline)
 
 Present it in Vietnamese, like everything else you say to the user; the labels
 above are the shape, not the wording. Ask the Step 1.5 failure policy in the
-same message, as a second question — one stop, two answers, so an approval
-leads straight into dispatching.
+same message, as a further question — **one stop, all the answers**, so an
+approval leads straight into dispatching.
+
+The Role/model line is an assertion only on a host this guide names both roles
+for (omp: `task` / `tiny`). On every other host it is a **question**: which
+model runs as default and which as backup is the user's to confirm, from the
+candidates you can actually see. See Step 2 of the delegation guide — an
+unanswered model question means inline, exactly like an unanswered gate.
 
 Declined, or unanswered, means inline: proceed inline and do not propose that
 dispatch again this run. Stopping here is never a reason to stop the work.
@@ -68,5 +76,8 @@ binds the agent talking to the user.
 - treat "the work looks parallel", an exposed agent tool, or a skill's own
   Delegation section as approval
 - dispatch a subagent to decide whether to dispatch subagents
+- state a role/model in the proposal as if it were settled, on a host with no
+  named default/backup pair — offer the candidates you can see, with a marked
+  recommendation, never pick quietly and never ask an open "which model?"
 - create a worktree or a branch to host a dispatch the user has not approved
 - report that work was done by subagents after the fact

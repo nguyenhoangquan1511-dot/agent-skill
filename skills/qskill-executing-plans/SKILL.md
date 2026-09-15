@@ -60,7 +60,8 @@ tool, Codex / Pi / CommandCode subagent tool, Oh-My-Pi agent roles).
 **Failure policy.** Ask the Step 1.5 question from
 [../shared/subagent-delegation.md](../shared/subagent-delegation.md) in the
 same message as the gate proposal — if the subagents fail outright, stop and
-report, or take over inline? One stop, two answers. Record the answer in the
+report, or take over inline? Ask the Step 2 model question there too when this
+host names no default/backup pair — one stop, all the answers. Record the answers in the
 progress ledger so it survives compaction, and apply it without asking again.
 Unanswered defaults to stop-and-report: the user may be away, and a hung
 execution they discover hours later is the worst outcome.

@@ -87,17 +87,68 @@ one — which defeats the entire point.
   default: a role that takes 3× the turns costs more than the one that got it
   right the first time.
 
-### Other hosts
+### Other hosts — the pair is unknown, so ask
 
-| Work | Role / model |
+A host has a **default/backup pair** only when this guide names both roles for
+it. Exactly one host does: omp (`task` / `tiny`). **Everywhere else the pair is
+unknown, and an unknown pair is confirmed by the user, never chosen by you.**
+
+Guessing here is invisible and expensive: a model you picked silently spends
+the user's quota at a rate they never agreed to, in a context they cannot see,
+and they only learn which model ran when the bill or the bad result arrives.
+
+So, before the first dispatch on such a host:
+
+1. **List the candidates you can actually observe** — the agent types, roles,
+   or model ids the host exposes to you, each with a one-line note on what it
+   is good for. Never invent a model id, and never list one you have not seen
+   in this session.
+2. **Recommend a default and a backup** from that list, with the reason in one
+   sentence, using the tiers below as the reasoning — a recommendation, not a
+   decision.
+3. **Ask the user to confirm both**, in the same message as the gate proposal
+   and the Step 1.5 failure policy. One stop, three answers.
+
+**The question is a menu, never an open question.** "Which model do you want?"
+hands the user your homework: they cannot see the host's roster, so an open
+question stalls the run instead of settling it. Give them named options with a
+marked recommendation, so the answer is one word:
+
+```
+Role/model — this host names no default pair, pick one:
+  A. <name>  — <one line: what it is good for>   <- proposed default
+  B. <name>  — <one line>                        <- proposed backup
+  C. <name>  — <one line>
+Run A as default with B as backup? (ok / swap to ...)
+```
+
+Present it in Vietnamese, like everything else you say to the user; the shape
+above is the shape, not the wording. Two candidates is a menu; one candidate is
+still a menu — name it and ask for a yes. Offer what the host exposes, not a
+catalogue of everything you know exists.
+
+| Work | Tier to recommend |
 |---|---|
 | Mechanical, fully specified, 1–2 files | cheapest tier |
 | Integration, pattern matching, multi-file | standard tier |
 | Architecture, design, whole-branch review | most capable tier |
 
-Turn count beats token price. Use a mid tier as the floor for anything that
-requires judgment; reserve the cheapest tier for transcription-shaped work
+Turn count beats token price. Recommend a mid tier as the floor for anything
+that requires judgment; reserve the cheapest tier for transcription-shaped work
 where the instructions already contain the exact content to produce.
+
+**If the user does not answer the model question, there is no default — run
+inline** and say why, exactly as an unanswered gate does. A run that cannot
+name its roles does not dispatch. Once confirmed, the pair holds for the rest
+of the session: the confirmed default on every dispatch, the confirmed backup
+only on failure, and Step 6 / Step 7 use them without asking again. Raising the
+role at Round 2 of the escalation ladder stays inside the confirmed pair unless
+the user confirms the higher one.
+
+**If you can observe no candidates at all** — the mechanism is exposed but
+names no roles or models you can choose from — say so and dispatch on the
+host's own default, naming it in the proposal. Silence about which model runs
+is what this rule forbids; an unavoidable default, stated out loud, is fine.
 
 ## Step 3: The Lead Contract
 
@@ -262,6 +313,14 @@ files:
   and say so.
 - Claim work was delegated when it was done inline.
 - Omit the role/model on a dispatch.
+- Pick a role/model yourself on a host with no named default/backup pair —
+  list what you can see, recommend, and let the user confirm both (Step 2).
+- Ask the model question open-endedly ("which model do you want?") instead of
+  offering named candidates with a marked recommendation.
+- Name a model or agent type you have not actually seen exposed in this
+  session.
+- Dispatch on a confirmed-pair host after the model question went unanswered —
+  unanswered means inline.
 - Start on the backup role (`tiny` on omp) instead of the default role.
 - Take over after a failure without the user's Step 1.5 policy saying so, or
   take over silently. Every failure is reported either way.
