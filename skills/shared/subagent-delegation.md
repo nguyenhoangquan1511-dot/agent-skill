@@ -186,7 +186,17 @@ Dispatch one agent, wait for its report, judge it, then dispatch the next.
 Used when the units are genuinely independent: separate research questions,
 separate files to analyse, separate sections to draft, separate review axes.
 
-- Dispatch them in one batch so they run concurrently.
+- Dispatch them in one batch so they run concurrently. **One message, every
+  dispatch in it** — that is what makes them concurrent, and it is also how you
+  collect them: the whole batch blocks, and every report arrives together in
+  that turn's results. No waiting step to write, no status to check.
+- **Do not use background dispatch for a batch you need this turn.** Background
+  dispatch hands you a name instead of a report, which leaves nothing to block
+  on — and an agent with nothing to block on invents a sleep-and-check loop
+  (forbidden in Step 6). Background dispatch is for work you will genuinely
+  leave running while you do something else, not for fan-out you are about to
+  read. If you catch yourself asking "how do I wait for these?", you dispatched
+  them the wrong way: re-dispatch as one blocking batch.
 - Keep the batch to a size you can actually adjudicate — roughly 3–6 at once.
   Beyond that the lead becomes the bottleneck and the reports blur together.
 - Every parallel agent writes to a **different** output file. Two agents
@@ -213,6 +223,33 @@ a dispatch. A fresh agent needs its unit, its interfaces, and its constraints.
 Nothing else.
 
 ## Step 6: Handling What Comes Back
+
+### Waiting is an event, never a poll
+
+A dispatched subagent reports back on its own. The host delivers that report —
+as the tool result for a blocking dispatch, or as a completion notification for
+a background one. **Waiting means doing nothing until that arrives.**
+
+**Never sleep-then-check.** A `sleep 30` followed by a status read is not
+waiting; it is a turn. Every such turn re-sends the whole conversation and
+re-reads the dispatch you were trying to keep out of context, so a loop of them
+costs more than the work being waited on — and it learns nothing the arriving
+report would not have told you for free.
+
+So, while a subagent is outstanding:
+
+- Do not sleep, do not busy-wait, do not read its output file "to see how far it
+  got", do not re-dispatch it because it feels slow.
+- Do the independent work that does not depend on its result, or say plainly
+  that you are waiting and stop.
+- **Check status only when the user asks.** That is the one trigger. If they ask
+  before the report lands, say it is still running — never guess at its result,
+  and never write the notification yourself.
+
+The single exception is a deadline the host cannot signal: work outside the
+host's tracking (a CI run, a deploy, a remote queue) that emits no completion
+event. There, one check timed to how fast that state actually changes — not a
+tight loop.
 
 Subagents report one of four statuses. Handle each:
 
@@ -333,6 +370,8 @@ files:
 - Let a round-3 subagent report DONE without its named goal being met.
 - Finish a lead takeover without telling the user it happened and that their
   review is now the only review that unit gets.
+- Sleep, busy-wait, or poll a dispatched subagent's status. Wait for its
+  report to arrive; check only when the user asks (Step 6).
 - Run parallel agents that write to the same file, or that edit the same
   source file.
 - Run plan execution in parallel.

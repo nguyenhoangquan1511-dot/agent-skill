@@ -361,8 +361,14 @@ in parallel — the units here are independent by nature.
 - The design itself, or the spec / research document. You write those from
   what the subagents found.
 
-Wait for the batch, read the reports, and only then ask your next question —
-questions built on a guess you could have delegated are wasted turns.
+Dispatch the batch as **one message containing every dispatch** — that is both
+what runs them concurrently and how you collect them: the batch blocks and all
+the reports come back together. There is no waiting step to write. Never
+dispatch fan-out in the background and then poll for it; see Step 4 of
+[../shared/subagent-delegation.md](../shared/subagent-delegation.md).
+
+Read the reports, and only then ask your next question — questions built on a
+guess you could have delegated are wasted turns.
 
 ## Path References
 
