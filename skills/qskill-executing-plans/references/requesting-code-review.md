@@ -28,7 +28,7 @@ HEAD_SHA=$(git rev-parse HEAD)
 
 **2. Dispatch code reviewer subagent:**
 
-Dispatch a `general-purpose` subagent, filling the template at [code-reviewer.md](code-reviewer.md)
+Dispatch the reviewer agent chosen per Step 2 of [../../shared/subagent-delegation.md](../../shared/subagent-delegation.md) (an exposed agent named for code review, else the user's pick), filling the template at [code-reviewer.md](code-reviewer.md)
 
 **Placeholders:**
 - `{DESCRIPTION}` - Brief summary of what you built

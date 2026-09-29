@@ -9,10 +9,8 @@ the controller — the subagent cannot derive them. See
 [commit-convention.md](commit-convention.md).
 
 ```
-Subagent (general-purpose):
+Subagent ([AGENT] — REQUIRED: the implementer agent chosen per subagent-driven-development.md Agent Selection):
   description: "Implement Task N: [task name]"
-  model: [MODEL — REQUIRED: choose per SKILL.md Model Selection; an omitted
-         model silently inherits the session's most expensive one]
   prompt: |
     You are implementing Task N: [task name]
 
@@ -97,7 +95,7 @@ Subagent (general-purpose):
 
     **How to escalate:** Report back with status BLOCKED or NEEDS_CONTEXT. Describe
     specifically what you're stuck on, what you've tried, and what kind of help you need.
-    The controller can provide more context, re-dispatch with a more capable model,
+    The controller can provide more context, re-dispatch on a more capable agent,
     or break the task into smaller pieces.
 
     ## Before Reporting Back: Self-Review

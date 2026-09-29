@@ -23,7 +23,7 @@ dispatch the next — parallel implementers would edit the same working tree.
 **Narration:** between tool calls, narrate at most one short line — the
 ledger and the tool results carry the record.
 
-**Continuous execution:** Do not pause to check in with your human partner between tasks. Execute all tasks from the plan without stopping. The only reasons to stop are: BLOCKED status you cannot resolve, ambiguity that genuinely prevents progress, a failed dispatch (see Handling Dispatch Failures — role error, exhausted quota, or no report at all), or all tasks complete. "Should I continue?" prompts and progress summaries waste their time — they asked you to execute the plan, so execute it.
+**Continuous execution:** Do not pause to check in with your human partner between tasks. Execute all tasks from the plan without stopping. The only reasons to stop are: BLOCKED status you cannot resolve, ambiguity that genuinely prevents progress, a failed dispatch (see Handling Dispatch Failures — agent error, exhausted quota, or no report at all), or all tasks complete. "Should I continue?" prompts and progress summaries waste their time — they asked you to execute the plan, so execute it.
 
 ## When to Use
 
@@ -118,24 +118,15 @@ before execution begins, not one interrupt per discovery mid-plan. If the
 scan is clean, proceed without comment. The review loop remains the net for
 conflicts that only emerge from implementation.
 
-## Model Selection
+## Agent Selection
 
 **REQUIRED REFERENCE:** [../../shared/subagent-delegation.md](../../shared/subagent-delegation.md)
-— role/model selection, the Oh-My-Pi `task` default with `tiny` as backup, the
-lead contract, and the dispatch prompt contract live there. Always name the
-role explicitly on every dispatch; an omitted role inherits the controller's
-own model.
+— agent selection (Step 2), the lead contract, and the dispatch prompt contract
+live there. Name the agent explicitly on every dispatch.
 
-Plan-execution specifics on top of that guide:
-
-**Task complexity signals (implementation tasks):**
-- Touches 1-2 files with a complete spec → cheap model
-- Touches multiple files with integration concerns → standard model
-- Requires design judgment or broad codebase understanding → most capable model
-
-The final whole-branch review is an architecture-level task — dispatch it on
-the most capable available model, not the session default. Review tasks scale
-with the diff's size, complexity, and risk.
+Plan execution needs three kinds of agent: an implementer, a task reviewer, and
+the final whole-branch reviewer. Settle each one per Step 2 — an exposed agent
+named for that work, else the user's pick — before Task 1.
 
 ## Handling Implementer Status
 
@@ -148,29 +139,27 @@ Implementer subagents report one of four statuses. Handle each appropriately:
 **NEEDS_CONTEXT:** The implementer needs information that wasn't provided. Provide the missing context and re-dispatch.
 
 **BLOCKED:** The implementer cannot complete the task. Assess the blocker:
-1. If it's a context problem, provide more context and re-dispatch with the same model
-2. If the task requires more reasoning, re-dispatch with a more capable model
+1. If it's a context problem, provide more context and re-dispatch on the same agent
+2. If the task requires more reasoning, re-dispatch on a more capable agent (a name-matched one, or one the user picks)
 3. If the task is too large, break it into smaller pieces
 4. If the plan itself is wrong, escalate to the human
 
-**Never** ignore an escalation or force the same model to retry without changes. If the implementer said it's stuck, something needs to change.
+**Never** ignore an escalation or force the same agent to retry without changes. If the implementer said it's stuck, something needs to change.
 
 ## Handling Dispatch Failures (no report at all)
 
-The four statuses above all assume the subagent answered. It may not: the role
+The four statuses above all assume the subagent answered. It may not: the agent
 errors out, the quota runs out mid-plan, or the dispatch hangs and nothing
 comes back. This is not a status to interpret — it is a failed dispatch, and it
 is the failure most likely to strand the whole execution while nobody is
 watching.
 
-1. **Retry once on the backup role**, same prompt, same task. On Oh-My-Pi that
-   is role `tiny`; elsewhere it is the next tier down that can still do the
-   work.
+1. **Retry once on the same agent**, same prompt, same task.
 2. **If the retry also fails, stop dispatching.** Do not loop, do not walk
    down the task list hoping the next dispatch works, and do not silently
    absorb the task into your own context.
 3. **Write the state to the ledger before anything else** — which task failed,
-   which roles were tried, and what the error said. Quota failures are exactly
+   which agent was tried, and what the error said. Quota failures are exactly
    the case where your context may not survive to explain itself.
 4. **Apply the Step 1.5 failure policy** from
    [../../shared/subagent-delegation.md](../../shared/subagent-delegation.md),
@@ -202,7 +191,7 @@ scopes:
 
 | | What it is | Scope |
 |---|---|---|
-| **Dispatch failure** (this section) | the mechanism died — role error, quota gone, nothing came back | **run-level**: stop dispatching, the next task would fail the same way |
+| **Dispatch failure** (this section) | the mechanism died — agent error, quota gone, nothing came back | **run-level**: stop dispatching, the next task would fail the same way |
 | **Round-3 BLOCKED** (Escalation Ladder) | the mechanism works, this one task keeps coming back wrong | **task-level**: you implement that task, then resume dispatching |
 
 This is the one exception to Continuous Execution above: a failed dispatch
@@ -456,7 +445,7 @@ Done!
 - Dispatch an implementer without `[PLAN_SLUG]` / `[PLAN_PATH]` filled in —
   the resulting commits cannot be grouped by plan
 - Finish with work left uncommitted (`git status --porcelain` must be clean)
-- Keep dispatching after a dispatch failed twice (default role + backup role) —
+- Keep dispatching after a dispatch failed twice (first try + one retry) —
   record it in the ledger and apply the Step 1.5 failure policy
 - Wait indefinitely on a subagent that has returned nothing — a stalled
   dispatch is a failed dispatch
@@ -472,7 +461,7 @@ Done!
 - Reviewer reviews again
 - Repeat until approved — **bounded at three rounds** by the Escalation Ladder
   in [../../shared/subagent-delegation.md](../../shared/subagent-delegation.md):
-  round 2 must change the role, the size, or the brief; round 3 is goal-locked
+  round 2 must change the agent, the size, or the brief; round 3 is goal-locked
   (DONE only if the named goal is met, otherwise BLOCKED); a BLOCKED there ends
   the delegation — the controller finishes that task itself, without a further
   review loop, and reports the takeover for the user to review.

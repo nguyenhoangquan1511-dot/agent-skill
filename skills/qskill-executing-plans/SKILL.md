@@ -15,7 +15,7 @@ Load plan, review critically, execute all tasks, report when complete.
 
 **Reference docs** (read on demand, they are not standalone skills):
 - [../shared/subagent-gate.md](../shared/subagent-gate.md) — **required before any dispatch**: subagents or inline is the user's call
-- [../shared/subagent-delegation.md](../shared/subagent-delegation.md) — **required once delegation is approved**: capability check, role selection, lead contract
+- [../shared/subagent-delegation.md](../shared/subagent-delegation.md) — **required once delegation is approved**: capability check, agent selection, lead contract
 - [references/subagent-driven-development.md](references/subagent-driven-development.md) — same-session execution via subagents
 - [references/using-git-worktrees.md](references/using-git-worktrees.md) — isolated workspace setup
 - [references/test-driven-development.md](references/test-driven-development.md) — TDD loop for each task
@@ -47,7 +47,7 @@ tool, Codex / Pi / CommandCode subagent tool, Oh-My-Pi agent roles).
   Say so in one line and do not raise the question again.
 - **Available →** propose delegation at the gate and **stop for the answer**.
   Name the split you intend: one implementer per plan task, serial, on the
-  current branch, on which role. Availability is not the decision; the user's
+  current branch, on which agent. Availability is not the decision; the user's
   answer is.
   - **User chooses subagents →** you are the lead: you read the plan, keep the
     todos and the ledger, dispatch one implementer per task, and judge every
@@ -60,14 +60,14 @@ tool, Codex / Pi / CommandCode subagent tool, Oh-My-Pi agent roles).
 **Failure policy.** Ask the Step 1.5 question from
 [../shared/subagent-delegation.md](../shared/subagent-delegation.md) in the
 same message as the gate proposal — if the subagents fail outright, stop and
-report, or take over inline? Ask the Step 2 model question there too when this
-host names no default/backup pair — one stop, all the answers. Record the answers in the
+report, or take over inline? Ask the Step 2 agent question there too when no
+exposed agent is named for implementing or reviewing — one stop, all the answers. Record the answers in the
 progress ledger so it survives compaction, and apply it without asking again.
 Unanswered defaults to stop-and-report: the user may be away, and a hung
 execution they discover hours later is the worst outcome.
 
 **Escalation ladder.** A task's fix/re-review loop is bounded at three rounds
-(Step 7 of the shared guide): round 2 must change the role, the size, or the
+(Step 7 of the shared guide): round 2 must change the agent, the size, or the
 brief; round 3 is goal-locked — the implementer may report DONE only if the
 named, checkable goal is met, otherwise BLOCKED. A BLOCKED at round 3 ends the
 delegation for that task: you implement it yourself, inline, with no further
@@ -87,10 +87,10 @@ time: dispatch, wait for the report, review it, mark the task complete, then
 dispatch the next. Never run two implementers at once — they would edit the
 same working tree.
 
-**Role selection.** On Oh-My-Pi, dispatch every implementer and reviewer on
-role `task`, with role `tiny` as the backup used only when `task` errors or
-runs out of quota. On other hosts, pick the role per the table in
-[../shared/subagent-delegation.md](../shared/subagent-delegation.md).
+**Agent selection.** Dispatch implementers and reviewers on the agents chosen
+per Step 2 of [../shared/subagent-delegation.md](../shared/subagent-delegation.md):
+an exposed agent named for the work (an implementer for implementing, a
+code-reviewer for reviewing), else the one the user picked.
 
 ### Step 1: Load and Review Plan
 0. Derive the **plan slug** from the plan filename — extension removed, **date kept** (`docs/superpowers/plans/2026-09-03-user-auth.md` -> `2026-09-03-user-auth`) — and use it in every commit of this execution. Never strip the date; feature names repeat across plans.

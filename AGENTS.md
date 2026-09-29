@@ -64,7 +64,7 @@ Current shared homes:
 - `skills/shared/subagent-gate.md` — **whether** a run uses subagents: the
   user's decision, for every skill. The entry door to the next file.
 - `skills/shared/subagent-delegation.md` — **how** to delegate once the user
-  has chosen it: capability check, roles, lead contract, escalation ladder.
+  has chosen it: capability check, agent selection, lead contract, escalation ladder.
 - `skills/qskill-executing-plans/references/commit-convention.md` — commit
   format and plan slug, for every skill that commits.
 - `skills/qskill-brainstorming/references/` — path-specific guides

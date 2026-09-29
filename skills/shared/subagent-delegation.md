@@ -2,7 +2,7 @@
 
 > **Shared guide** (not a standalone skill). Read when a skill says to delegate
 > work to subagents. It is the single source of truth for: capability
-> detection, role/model selection, the lead contract, concurrency, and
+> detection, agent selection, the lead contract, concurrency, and
 > fallback on failure or quota exhaustion. **How** to delegate lives here;
 > **whether** to lives in [subagent-gate.md](subagent-gate.md), and the answer
 > there is the user's.
@@ -22,7 +22,7 @@ mechanism. Check, once, at the start of the skill:
 | Claude Code | `Task` / `Agent` tool | the tool appears in the tool list |
 | Codex | subagent / delegate tool | the tool appears in the tool list |
 | Pi | subagent tool | the tool appears in the tool list |
-| Oh-My-Pi (omp) | agent roles (`task`, `tiny`, …) | role dispatch is exposed |
+| Oh-My-Pi (omp) | agent roles | role dispatch is exposed |
 | CommandCode | subagent tool | the tool appears in the tool list |
 
 **If no such tool is exposed, stop reading this guide and do the work
@@ -40,15 +40,15 @@ consent, owned by the skill that needs it.
 
 ## Step 1.5: Failure Policy (ask once, before the first dispatch)
 
-Subagents can die on you — the role errors out, the quota runs out, the
+Subagents can die on you — the agent errors out, the quota runs out, the
 mechanism stops responding. The user may have walked away by then, so the
 answer cannot wait until it happens: **ask before the first dispatch, then
 never ask again in this session.**
 
 Ask exactly this, as one question with two options:
 
-> Delegating to subagents. If they all fail (role error or quota exhausted on
-> both the default and the backup role), should I **(A) stop and report**, or
+> Delegating to subagents. If they fail (agent error or quota exhausted, and
+> one retry fails too), should I **(A) stop and report**, or
 > **(B) take over and finish the work myself**?
 
 - **(A) Stop** — halt at the failed unit, leave completed work committed, and
@@ -68,87 +68,45 @@ recoverable, a silent hang is not.
 Whichever policy applies, a failure is always reported. It is never absorbed
 into the lead without the user learning that the delegation failed.
 
-## Step 2: Role / Model Selection
+## Step 2: Agent Selection
 
-Pick the weakest role that can do the task; name it explicitly on every
-dispatch. An omitted role inherits the lead's own model — the most expensive
-one — which defeats the entire point.
+Every dispatch runs on a named **agent** — an agent type, named agent, or role
+the host exposes to you in this session. This guide defines no roles and no
+models of its own: the agent's own definition decides how it runs. Pick the
+agent per kind of work (implementer, reviewer, researcher, searcher), before
+the first dispatch:
 
-### Oh-My-Pi (omp)
-
-- **Default role: `task`** for every dispatched unit of work.
-- **Backup role: `tiny`** — used only when the `task` role fails to run: an
-  error from the role itself, or its quota is exhausted.
-- Fallback is per dispatch, not global: retry the same unit once on `tiny`
-  with the identical prompt. If `tiny` also fails, the unit has failed —
-  apply the failure policy agreed in Step 1.5 (stop and report, or take over
-  inline) and say which one you are applying.
-- Never start on `tiny` to save cost. `tiny` is a backup, not a cheaper
-  default: a role that takes 3× the turns costs more than the one that got it
-  right the first time.
-
-### Other hosts — the pair is unknown, so ask
-
-A host has a **default/backup pair** only when this guide names both roles for
-it. Exactly one host does: omp (`task` / `tiny`). **Everywhere else the pair is
-unknown, and an unknown pair is confirmed by the user, never chosen by you.**
-
-Guessing here is invisible and expensive: a model you picked silently spends
-the user's quota at a rate they never agreed to, in a context they cannot see,
-and they only learn which model ran when the bill or the bad result arrives.
-
-So, before the first dispatch on such a host:
-
-1. **List the candidates you can actually observe** — the agent types, roles,
-   or model ids the host exposes to you, each with a one-line note on what it
-   is good for. Never invent a model id, and never list one you have not seen
-   in this session.
-2. **Recommend a default and a backup** from that list, with the reason in one
-   sentence, using the tiers below as the reasoning — a recommendation, not a
-   decision.
-3. **Ask the user to confirm both**, in the same message as the gate proposal
-   and the Step 1.5 failure policy. One stop, three answers.
-
-**The question is a menu, never an open question.** "Which model do you want?"
-hands the user your homework: they cannot see the host's roster, so an open
-question stalls the run instead of settling it. Give them named options with a
-marked recommendation, so the answer is one word:
+1. **Match by name.** Read the agents the host actually exposes. When one's
+   name — backed by its description — fits the work (`code-reviewer` for a
+   review, `Explore` for a codebase search, `Plan` for design work), that agent
+   does the work. Name it in the gate proposal so the user sees it.
+2. **No match → the user picks from a menu.** List the agents you can observe,
+   each with a one-line note on what it is good for, mark one recommendation,
+   and ask — in the same message as the gate proposal and the Step 1.5 failure
+   policy. One stop, all the answers.
 
 ```
-Role/model — this host names no default pair, pick one:
-  A. <name>  — <one line: what it is good for>   <- proposed default
-  B. <name>  — <one line>                        <- proposed backup
-  C. <name>  — <one line>
-Run A as default with B as backup? (ok / swap to ...)
+Agent — no agent here is named for <kind of work>, pick one:
+  A. <name>  — <one line: what it is good for>   <- recommended
+  B. <name>  — <one line>
+Run on A? (ok / B / ...)
 ```
 
 Present it in Vietnamese, like everything else you say to the user; the shape
-above is the shape, not the wording. Two candidates is a menu; one candidate is
-still a menu — name it and ask for a yes. Offer what the host exposes, not a
-catalogue of everything you know exists.
+above is the shape, not the wording. One candidate is still a menu — name it
+and ask for a yes. List only agents you have seen exposed in this session;
+never invent one. A menu, not an open "which agent do you want?": the user
+cannot see the host's roster, so an open question stalls the run.
 
-| Work | Tier to recommend |
-|---|---|
-| Mechanical, fully specified, 1–2 files | cheapest tier |
-| Integration, pattern matching, multi-file | standard tier |
-| Architecture, design, whole-branch review | most capable tier |
+**If the user does not answer the agent question, run inline** and say why,
+exactly as an unanswered gate does. **If the host exposes the mechanism but
+names no agents at all**, say so and dispatch on its default agent, naming it
+in the proposal.
 
-Turn count beats token price. Recommend a mid tier as the floor for anything
-that requires judgment; reserve the cheapest tier for transcription-shaped work
-where the instructions already contain the exact content to produce.
-
-**If the user does not answer the model question, there is no default — run
-inline** and say why, exactly as an unanswered gate does. A run that cannot
-name its roles does not dispatch. Once confirmed, the pair holds for the rest
-of the session: the confirmed default on every dispatch, the confirmed backup
-only on failure, and Step 6 / Step 7 use them without asking again. Raising the
-role at Round 2 of the escalation ladder stays inside the confirmed pair unless
-the user confirms the higher one.
-
-**If you can observe no candidates at all** — the mechanism is exposed but
-names no roles or models you can choose from — say so and dispatch on the
-host's own default, naming it in the proposal. Silence about which model runs
-is what this rule forbids; an unavoidable default, stated out loud, is fine.
+Once settled, the choice holds for the rest of the session: that agent on every
+dispatch of that kind of work, and Step 6 / Step 7 use it without asking again.
+Pass the agent explicitly on every dispatch, and leave its model to its own
+definition.
 
 ## Step 3: The Lead Contract
 
@@ -216,7 +174,7 @@ Every dispatch, in either mode, contains exactly these parts:
 4. **The output contract**: the exact file path to write its full result to,
    and what to return in the reply (status, one-line summary, blockers — not
    the full result).
-5. **The role/model** to run on.
+5. **The agent** to run on (Step 2).
 
 Never paste session history, prior-task summaries, or accumulated context into
 a dispatch. A fresh agent needs its unit, its interfaces, and its constraints.
@@ -258,12 +216,14 @@ Subagents report one of four statuses. Handle each:
   concerns get resolved before the result is accepted; observations are noted.
 - **NEEDS_CONTEXT** — supply exactly what is missing, re-dispatch the same unit.
 - **BLOCKED** — assess: missing context → re-dispatch with it; too hard for the
-  role → re-dispatch on a stronger role; too large → split; source document
+  agent → re-dispatch on a stronger agent (Step 7, Round 2); too large →
+  split; source document
   wrong → escalate to the user.
-- **No report at all** (the role errored, timed out, or the quota is gone) —
-  retry once on the backup role, then apply the Step 1.5 failure policy.
+- **No report at all** (the agent errored, timed out, or the quota is gone) —
+  retry once on the same agent with the same prompt, then apply the Step 1.5
+  failure policy.
 
-Never re-dispatch an identical prompt to an identical role after a BLOCKED.
+Never re-dispatch an identical prompt to an identical agent after a BLOCKED.
 Something must change.
 
 ## Step 7: Escalation Ladder (wrong result, repeated)
@@ -275,12 +235,13 @@ nobody is watching.
 
 **A unit gets at most three rounds. Then it comes home to the lead.**
 
-**Round 1 — fix.** Dispatch a fix subagent on the same role, carrying the
+**Round 1 — fix.** Dispatch a fix subagent on the same agent, carrying the
 findings verbatim. Normal loop.
 
 **Round 2 — change one variable.** Re-dispatching the same prompt to the same
-role is forbidden. Change exactly one thing, and say which:
-- the role (raise it), or
+agent is forbidden. Change exactly one thing, and say which:
+- the agent (another name-matched agent, or one the user picks from the
+  Step 2 menu), or
 - the size (split the unit), or
 - the brief (rewrite it, when the ambiguity is in the requirement).
 
@@ -313,7 +274,7 @@ delegation for that unit. The lead does the work itself, inline, and:
 
 **The takeover is scoped to that one unit.** The ladder counts per unit, not
 per session: the lead finishes the blocked unit, and then **goes straight back
-to dispatching** — the next unit starts at round 1, on the normal role, like
+to dispatching** — the next unit starts at round 1, on the settled agent, like
 nothing happened. One hard task does not turn the rest of the run into inline
 work. The only thing that ends delegation for the whole session is the
 mechanism itself dying (Step 1.5).
@@ -328,7 +289,7 @@ the burn. The three-round cap exists for exactly this reason; it is a spend
 limit, not a patience limit.
 
 **Relation to Step 1.5.** They cover different failures and do not compete:
-Step 1.5 is the *mechanism* dying (role error, quota gone — nothing ran); the
+Step 1.5 is the *mechanism* dying (agent error, quota gone — nothing ran); the
 ladder is the mechanism working and producing wrong results. The ladder always
 ends in lead takeover plus user review, whichever Step 1.5 policy is in force.
 
@@ -349,16 +310,13 @@ files:
 - Delegate when the host exposes no subagent mechanism — do the work inline
   and say so.
 - Claim work was delegated when it was done inline.
-- Omit the role/model on a dispatch.
-- Pick a role/model yourself on a host with no named default/backup pair —
-  list what you can see, recommend, and let the user confirm both (Step 2).
-- Ask the model question open-endedly ("which model do you want?") instead of
+- Omit the agent on a dispatch.
+- Pick an agent yourself when none is named for the work — list what you can
+  see, recommend one, and let the user pick (Step 2).
+- Ask the agent question open-endedly ("which agent do you want?") instead of
   offering named candidates with a marked recommendation.
-- Name a model or agent type you have not actually seen exposed in this
-  session.
-- Dispatch on a confirmed-pair host after the model question went unanswered —
-  unanswered means inline.
-- Start on the backup role (`tiny` on omp) instead of the default role.
+- Name an agent you have not actually seen exposed in this session.
+- Dispatch after the agent question went unanswered — unanswered means inline.
 - Take over after a failure without the user's Step 1.5 policy saying so, or
   take over silently. Every failure is reported either way.
 - Dispatch before the Step 1.5 failure policy has been asked.
@@ -366,7 +324,7 @@ files:
   policy defaults to stop-and-report.
 - Run a fix/re-review loop past three rounds — round 3 is goal-locked, and a
   BLOCKED there means the lead finishes the unit itself (Step 7).
-- Re-dispatch round 2 without changing the role, the size, or the brief.
+- Re-dispatch round 2 without changing the agent, the size, or the brief.
 - Let a round-3 subagent report DONE without its named goal being met.
 - Finish a lead takeover without telling the user it happened and that their
   review is now the only review that unit gets.

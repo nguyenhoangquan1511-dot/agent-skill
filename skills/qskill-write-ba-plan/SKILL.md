@@ -327,7 +327,7 @@ below, stop for their answer, and run inline until it comes.
 
 **REQUIRED REFERENCE once they choose subagents:**
 [../shared/subagent-delegation.md](../shared/subagent-delegation.md) —
-capability check, role selection (Oh-My-Pi: role `task`, backup `tiny`), the
+capability check, agent selection (a name-matched agent, else the user picks), the
 lead contract, the dispatch prompt contract.
 
 When subagents are available you are the lead: you read the spec, decide the

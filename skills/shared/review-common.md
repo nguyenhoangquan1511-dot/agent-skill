@@ -280,8 +280,8 @@ this run uses subagents at all. Propose the split below, stop for their answer,
 and run inline until it comes.
 
 **REQUIRED REFERENCE once they choose subagents:**
-[subagent-delegation.md](subagent-delegation.md) — capability check, role
-selection (Oh-My-Pi: role `task`, backup `tiny`), the lead contract, the
+[subagent-delegation.md](subagent-delegation.md) — capability check, agent
+selection (a name-matched agent, else the user picks), the lead contract, the
 dispatch prompt contract.
 
 When subagents are available you are the lead in every mode: you own the
